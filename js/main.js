@@ -6,7 +6,7 @@ var UrlType;
     UrlType[UrlType["Article"] = 1] = "Article";
 })(UrlType || (UrlType = {}));
 class Helpers {
-    static ExtractMtaPic(element) {
+    static SaveMtaPicAsArticle(element) {
         let ul = $(element);
         // let i = $("div.multiarticles");
         // console.log(element.dataset);
@@ -65,7 +65,7 @@ class Helpers {
         }
         return undefined;
     }
-    static ExtractMta(element) {
+    static SaveMtaItemAsArticle(element) {
         let aElement = element.querySelector(".mta_title");
         if (aElement === null)
             return undefined;
@@ -118,11 +118,15 @@ $(document).ready(() => {
         // send amlak to server
     }
 });
+let mtaItemsArticles = [];
 function extractHomePage(data) {
+    mtaItemsArticles = data;
+    console.log("extracting home page");
     removeBanners();
-    extractStr3s(data);
-    extractMtaPic(data);
-    extractMTA(data);
+    extractStr3s();
+    extractMtaPic();
+    extractContentWrap();
+    //extractMTA(data);
 }
 let mtaPicsArticles = [];
 function removeBanners() {
@@ -133,7 +137,7 @@ function removeBanners() {
     if (p6Closest != undefined)
         p6Closest.remove();
 }
-function extractStr3s(data) {
+function extractStr3s() {
     let heightArray = [];
     $("div.str3s_txt").each((index, element) => {
         let article = Helpers.ExtractStr3s(element);
@@ -141,7 +145,7 @@ function extractStr3s(data) {
             heightArray.push(0);
             return;
         }
-        let result = data.filter(value => value.id === article.id);
+        let result = mtaItemsArticles.filter(value => value.id === article.id);
         if (result.length != 1) {
             heightArray.push(0);
             return;
@@ -173,17 +177,18 @@ function extractArticle() {
     article.amlak = amlakElement.innerHTML;
     return article;
 }
-function extractMtaPic(data) {
+function extractMtaPic() {
     $("ul.mta_pic_items").each((index, element) => {
         console.log("extractMTAPic " + index);
-        let article = Helpers.ExtractMtaPic(element);
+        let article = Helpers.SaveMtaPicAsArticle(element);
         if (article != undefined)
             mtaPicsArticles.push(article);
     });
 }
-function extractMTA(data) {
+function extractMTA() {
     let clones = [];
     $("div.content_wrap > .mta_pic_items > li, .multiarticles.mta_3 > .content_wrap > .mta_pic_items > li").each((index, element) => {
+        console.log("extracting mta_item " + index);
         let li = $(element);
         let a = li.find(".multiarticles.mta_2 .mta_pic_link, .multiarticles.mta_3 .mta_pic_link, .multiarticles.mta_2 .mta_pic, .multiarticles.mta_3 .mta_pic");
         if (a === undefined) {
@@ -248,10 +253,10 @@ function extractMTA(data) {
     //   $(element).prepend(clones[index]);
     // });
     $("ul.mta_items > li").each((index, element) => {
-        let article = Helpers.ExtractMta(element);
+        let article = Helpers.SaveMtaItemAsArticle(element);
         if (article === undefined)
             return;
-        let result = data.filter(value => value.id === article.id);
+        let result = mtaItemsArticles.filter(value => value.id === article.id);
         if (result.length != 1)
             return;
         let amlak = result[0];
@@ -262,4 +267,75 @@ function extractMTA(data) {
             subElement.innerHTML = amlak.amlak;
         }
     });
+}
+function extractContentWrap() {
+    let rootUl = $(".multiarticles.mta_4 > .content_wrap > .mta_pic_items, .multiarticles.mta_3 > .content_wrap > .mta_pic_items");
+    rootUl.each((index, element) => {
+        let ul = $(element);
+        let div = ul.parent();
+        console.log("number of parents " + div.length);
+        let ulMtaItems = div.find("ul.mta_items").clone(true);
+        ulMtaItems.css("clear", "both");
+        ulMtaItems.css("padding-top", "10px");
+        div.empty();
+        buildMTAPicDiv(ul, div);
+        //div.append(ulMtaItems);
+        BuildMTAItems(ulMtaItems);
+        div.append(ulMtaItems);
+    });
+}
+function buildMTAPicDiv(ul, div) {
+    let li = ul.find("li:first-child");
+    li.each((index, element) => { });
+    console.log("li class name: " + li.attr("class"));
+    let a = li.find("a:first-child");
+    if (a === undefined || a === null) {
+        console.log("<a> not found!");
+        return;
+    }
+    console.log("a class name: " + a.attr("class"));
+    let href = a.attr("href");
+    let id = href
+        .substring(0, href.lastIndexOf(".html"))
+        .split("/")
+        .pop();
+    console.log("id: " + id);
+    let article = mtaPicsArticles.filter(value => value.id === id)[0];
+    if (article === undefined) {
+        console.log("article is undefined exiting");
+        return;
+    }
+    let e = $.parseHTML(`<div style="clear: both">
+        <div ><a><img style="float:right;overflow:auto;clear:both" src="${article.imgLink}"></a>
+        </div>
+       
+  
+        <div class="str3s_txt">
+        <div class="title" style="margin-right: 10px">${article.title}</div>
+        <div style="margin-right: 10px">amlak goes here</div>
+        
+        </div>`);
+    console.log("pushing " + $(e).html());
+    div.append(e);
+}
+function BuildMTAItems(ul) {
+    let li = ul.find("li");
+    li.each((index, element) => {
+        let article = Helpers.SaveMtaItemAsArticle(element);
+        if (article === undefined)
+            return;
+        let result = mtaItemsArticles.filter(value => value.id === article.id);
+        if (result.length != 1)
+            return;
+        let amlak = result[0];
+        if (article != undefined) {
+            let subElement = $(element)
+                .children()
+                .get(1);
+            subElement.innerHTML = amlak.amlak;
+        }
+    });
+    // $("ul.mta_items > li").each((index, element) => {
+    //   }
+    // });
 }
