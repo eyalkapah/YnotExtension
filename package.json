@@ -1,0 +1,20 @@
+{
+  "name": "c",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "3.0.1"
+  },
+  "dependencies": {
+    "@types/chrome": "0.0.71",
+    "@types/jquery": "^3.3.5",
+    "jquery": "^3.3.1"
+  }
+}
