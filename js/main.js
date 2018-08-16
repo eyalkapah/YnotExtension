@@ -6,38 +6,6 @@ var UrlType;
     UrlType[UrlType["Article"] = 1] = "Article";
 })(UrlType || (UrlType = {}));
 class Helpers {
-    static SaveMtaPicAsArticle(element) {
-        let ul = $(element);
-        // let i = $("div.multiarticles");
-        // console.log(element.dataset);
-        // let regionName = ul.find("li").data("tb-owning-region-name");
-        // console.log("region name: " + regionName);
-        let linkUrl = ul.find("a.mta_pic_link").attr("href");
-        console.log("linkUrl: " + linkUrl);
-        if (linkUrl === undefined)
-            return;
-        let id = linkUrl
-            .substring(0, linkUrl.lastIndexOf(".html"))
-            .split("/")
-            .pop();
-        console.log("id: " + id);
-        let imgLink = ul.find("img.mta_pic").attr("src");
-        console.log("imgLink: " + imgLink);
-        let title = ul.find("a.mta_title").text();
-        console.log("title: " + title);
-        if (title != undefined &&
-            id != undefined &&
-            linkUrl != undefined &&
-            imgLink != undefined) {
-            let article = new Article();
-            article.id = id;
-            article.title = title;
-            article.link = linkUrl;
-            article.imgLink = imgLink;
-            return article;
-        }
-        return undefined;
-    }
     static ExtractStr3s(element) {
         let titleElement = element.querySelector(".title");
         if (titleElement === null)
@@ -124,9 +92,10 @@ function extractHomePage(data) {
     console.log("extracting home page");
     removeBanners();
     extractStr3s();
-    extractMtaPic();
+    //extractMtaPic();
     extractContentWrap();
     //extractMTA(data);
+    adjustHeights();
 }
 let mtaPicsArticles = [];
 function removeBanners() {
@@ -176,14 +145,6 @@ function extractArticle() {
     let amlakElement = $(".art_header_sub_title").get(0);
     article.amlak = amlakElement.innerHTML;
     return article;
-}
-function extractMtaPic() {
-    $("ul.mta_pic_items").each((index, element) => {
-        console.log("extractMTAPic " + index);
-        let article = Helpers.SaveMtaPicAsArticle(element);
-        if (article != undefined)
-            mtaPicsArticles.push(article);
-    });
 }
 function extractMTA() {
     let clones = [];
@@ -279,40 +240,36 @@ function extractContentWrap() {
         ulMtaItems.css("padding-top", "10px");
         div.empty();
         buildMTAPicDiv(ul, div);
-        //div.append(ulMtaItems);
         BuildMTAItems(ulMtaItems);
         div.append(ulMtaItems);
     });
 }
 function buildMTAPicDiv(ul, div) {
-    let li = ul.find("li:first-child");
-    li.each((index, element) => { });
-    console.log("li class name: " + li.attr("class"));
-    let a = li.find("a:first-child");
-    if (a === undefined || a === null) {
-        console.log("<a> not found!");
+    let linkUrl = ul.find("a.mta_pic_link").attr("href");
+    console.log("linkUrl: " + linkUrl);
+    if (linkUrl === undefined)
         return;
-    }
-    console.log("a class name: " + a.attr("class"));
-    let href = a.attr("href");
-    let id = href
-        .substring(0, href.lastIndexOf(".html"))
+    let id = linkUrl
+        .substring(0, linkUrl.lastIndexOf(".html"))
         .split("/")
         .pop();
     console.log("id: " + id);
-    let article = mtaPicsArticles.filter(value => value.id === id)[0];
-    if (article === undefined) {
-        console.log("article is undefined exiting");
-        return;
-    }
+    let imgLink = ul.find("img.mta_pic").attr("src");
+    console.log("imgLink: " + imgLink);
+    let title = ul.find("a.mta_title").text();
+    console.log("title: " + title);
+    let article = mtaItemsArticles.filter(value => value.id === id)[0];
+    let amlak = "";
+    if (article != undefined)
+        amlak = article.amlak;
     let e = $.parseHTML(`<div style="clear: both">
-        <div ><a><img style="float:right;overflow:auto;clear:both" src="${article.imgLink}"></a>
+        <div ><a href="${linkUrl}"><img style="float:right;overflow:auto;clear:both" src="${imgLink}"></a>
         </div>
        
   
         <div class="str3s_txt">
-        <div class="title" style="margin-right: 10px">${article.title}</div>
-        <div style="margin-right: 10px">amlak goes here</div>
+        <div class="title" style="margin-right: 10px">${title}</div>
+        <div style="margin-right: 10px">${amlak}</div>
         
         </div>`);
     console.log("pushing " + $(e).html());
@@ -338,4 +295,29 @@ function BuildMTAItems(ul) {
     // $("ul.mta_items > li").each((index, element) => {
     //   }
     // });
+}
+function adjustHeights() {
+    console.log("### Adjust Heights");
+    $("div.block.B6").each((index, element) => {
+        let divs = $(element).find("div.content_wrap");
+        console.log("div.content_wrap found: " + divs.length);
+        let heights = [];
+        if (divs.length === 2) {
+            divs.each((index, element) => {
+                heights.push($(element).height());
+                // let height = $(element).attr("height");
+                // console.log("height found: " + height);
+            });
+            let maxHeight = Math.max(...heights);
+            console.log("max height found: " + maxHeight);
+            divs.each((index, element) => {
+                if ($(element).height() != maxHeight) {
+                    $(element).height(maxHeight);
+                }
+            });
+        }
+        // console.log("Number of content_wrap divs: " + div.length);
+        console.log($(element).attr("class"));
+        console.log("content_wraps found: " + divs.length);
+    });
 }
