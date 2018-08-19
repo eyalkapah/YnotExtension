@@ -1,3 +1,4 @@
+let mtaItemsArticles = [];
 class Article {
 }
 var UrlType;
@@ -63,6 +64,14 @@ class Helpers {
         return undefined;
     }
 }
+function removeBanners() {
+    let element = $('div[data-tb-region*="News"]').first();
+    let p = element.parentsUntil("div.block.B6").last();
+    let p6 = p.parent();
+    let p6Closest = p6.prev("div.block.B6");
+    if (p6Closest != undefined)
+        p6Closest.remove();
+}
 $(document).ready(() => {
     let pageType = Helpers.ExtractUrl(document.URL);
     if (pageType === UrlType.Home) {
@@ -86,25 +95,99 @@ $(document).ready(() => {
         // send amlak to server
     }
 });
-let mtaItemsArticles = [];
 function extractHomePage(data) {
     mtaItemsArticles = data;
     console.log("extracting home page");
+    extractMainTitles();
     removeBanners();
-    extractStr3s();
-    //extractMtaPic();
+    //extractStr3s();
     extractContentWrap();
-    //extractMTA(data);
     adjustHeights();
 }
-let mtaPicsArticles = [];
-function removeBanners() {
-    let element = $('div[data-tb-region*="News"]').first();
-    let p = element.parentsUntil("div.block.B6").last();
-    let p6 = p.parent();
-    let p6Closest = p6.prev("div.block.B6");
-    if (p6Closest != undefined)
-        p6Closest.remove();
+function extractMainTitles() {
+    console.log("extracting main titles");
+    let rootDiv = $(".str3s_small.str3s_type_small, .str3s_small.str3s_type_small > .cell, .str3s_small.str3s_type_small > .cell > a, .str3s_small.str3s_type_small > .cell > .str3s_img > img");
+    console.log("total number of rootDivs found: " + rootDiv.length);
+    let parentDiv = rootDiv.first().closest("div.block.B3");
+    console.log(`number of parent div for "${parentDiv.attr("class")}": ${parentDiv.length}`);
+    let parentDivCloned = parentDiv.clone(true);
+    parentDiv.empty();
+    let clones = [];
+    parentDivCloned.children().each((index, element) => {
+        let div = $(element);
+        console.log(`title number: ${index}`);
+        let divChildClass = div.find(":first-child").attr("class");
+        console.log(`title div element name: ${divChildClass}`);
+        if (divChildClass != "str3s str3s_small str3s_type_small")
+            return;
+        // console.log("number of titles div found: " + parentDiv.length);
+        let divClone = div.clone(true);
+        let e = buildTitle(divClone);
+        if (e != undefined)
+            parentDiv.append(e);
+        else
+            parentDiv.append(divClone);
+        console.log("------------------");
+    });
+}
+function buildClonedTitle(rootDiv) {
+    // str3s str3s_small str3s_type_small
+    console.log(`building cloned title: ${rootDiv.attr("class")}`);
+    let title = rootDiv.find("div.title").text();
+    console.log(`title: ${title}`);
+    let a = rootDiv.find("a.str3s_img");
+    let linkUrl = a.attr("href");
+    console.log("linkUrl: " + linkUrl);
+    if (linkUrl === undefined)
+        return;
+    let id = linkUrl
+        .substring(0, linkUrl.lastIndexOf(".html"))
+        .split("/")
+        .pop();
+    console.log("id: " + id);
+    //let imgLink = a.find("img").attr("src");
+    let article = mtaItemsArticles.filter(value => value.id === id)[0];
+    if (article === undefined)
+        return undefined;
+    console.log("found article");
+    let subtitleDiv = rootDiv.find("div.sub_title.sub_title_no_credit");
+    subtitleDiv.text(article.amlak);
+    return rootDiv;
+}
+function buildTitle(rootDiv) {
+    rootDiv.removeClass();
+    let background = rootDiv
+        .find("div.str3s.str3s_small.str3s_type_small")
+        .css("background");
+    console.log(`background found: ${background}`);
+    let a = rootDiv.find("a.str3s_img");
+    let linkUrl = a.attr("href");
+    console.log("linkUrl: " + linkUrl);
+    if (linkUrl === undefined)
+        return;
+    let id = linkUrl
+        .substring(0, linkUrl.lastIndexOf(".html"))
+        .split("/")
+        .pop();
+    console.log("id: " + id);
+    let imgLink = a.find("img").attr("src");
+    let article = mtaItemsArticles.filter(value => value.id === id)[0];
+    if (article === undefined)
+        return;
+    console.log(`article found for id: ${id}`);
+    let titleDiv = rootDiv.find("div.title");
+    let title = titleDiv.text();
+    let e = $.parseHTML(`<div style="clear: both;background: ${background};margin-bottom: 16px;min-height: 118px">
+        <div style="margin-right: 3px"><a href="${linkUrl}"><img style="float:right;overflow:auto;clear:both;margin-top: 20px" src="${imgLink}"></a>
+        </div>
+       
+  
+        <div class="str3s_txt">
+        <div class="title" style="margin-top: 16px;margin-right: -10px;text-align: right;color:#FFFFFF;line-height:22px">${title}</div>
+        <div class="sub_title sub_title_no_credit" style="margin: 3px 10px 16px 10px; text-align: right;color:#FFFFFF;line-height:17px">${article.amlak}</div>
+        
+        </div>`);
+    return e;
 }
 function extractStr3s() {
     let heightArray = [];
@@ -145,89 +228,6 @@ function extractArticle() {
     let amlakElement = $(".art_header_sub_title").get(0);
     article.amlak = amlakElement.innerHTML;
     return article;
-}
-function extractMTA() {
-    let clones = [];
-    $("div.content_wrap > .mta_pic_items > li, .multiarticles.mta_3 > .content_wrap > .mta_pic_items > li").each((index, element) => {
-        console.log("extracting mta_item " + index);
-        let li = $(element);
-        let a = li.find(".multiarticles.mta_2 .mta_pic_link, .multiarticles.mta_3 .mta_pic_link, .multiarticles.mta_2 .mta_pic, .multiarticles.mta_3 .mta_pic");
-        if (a === undefined) {
-            console.log("<a> not found!");
-            return;
-        }
-        let href = a.attr("href");
-        let id = href
-            .substring(0, href.lastIndexOf(".html"))
-            .split("/")
-            .pop();
-        console.log("id: " + id);
-        let article = mtaPicsArticles.filter(value => value.id === id)[0];
-        if (article === undefined) {
-            console.log("article is undefined exiting");
-            return;
-        }
-        //if (article === undefined) return;
-        //let result = data.filter(value => value.id === article!.id);
-        // let amlak = result[0];
-        // amlak.amlak += amlak.amlak;
-        // let numOfLines = Math.ceil(amlak.amlak.length / 52);
-        // let height = numOfLines * 17;
-        // let e = $.parseHTML(
-        //   `<li class="relative_block" style="height: ${height}px;clear:both"><div>
-        //   <div ><a><img style="float:right;overflow:auto;clear:both" src="${
-        //     article.imgLink
-        //   }"></a>
-        //   </div>
-        //   <div class="str3s_txt">
-        //   <div class="title" style="margin-right: 10px">${article.title}</div>
-        //   <div style="margin-right: 10px">${result[0].amlak}</div>
-        //   </div></li>`
-        // );
-        let e = $.parseHTML(`<div>
-      <div ><a><img style="float:right;overflow:auto;clear:both" src="${article.imgLink}"></a>
-      </div>
-     
-
-      <div class="str3s_txt">
-      <div class="title" style="margin-right: 10px">${article.title}</div>
-      <div style="margin-right: 10px">amlak goes here</div>
-      
-      </div>`);
-        console.log("pushing " + $(e).html());
-        clones.push(e);
-    });
-    // Delete MTA_PIC
-    $("div.content_wrap > .mta_pic_items, .multiarticles.mta_3 > .content_wrap > .mta_pic_items").remove();
-    // Add new custom MTA_PIC
-    $("div.content_wrap").each((index, element) => {
-        $(element).empty();
-        let e = clones[index];
-        console.log("adding " + $(e).html());
-        $(element).append(clones[index]);
-    });
-    $(".multiarticles.mta_4 > .content_wrap .mta_items_wrap, .multiarticles.mta_3 > .content_wrap .mta_items_wrap").each((index, element) => {
-        $(element).css("margin-right", "10px");
-    });
-    //let div = $(".str3s.str3s_small.str3s_type_small").first().clone();
-    // $("ul.mta_items").each((index, element) => {
-    //   $(element).prepend(clones[index]);
-    // });
-    $("ul.mta_items > li").each((index, element) => {
-        let article = Helpers.SaveMtaItemAsArticle(element);
-        if (article === undefined)
-            return;
-        let result = mtaItemsArticles.filter(value => value.id === article.id);
-        if (result.length != 1)
-            return;
-        let amlak = result[0];
-        if (article != undefined) {
-            let subElement = $(element)
-                .children()
-                .get(1);
-            subElement.innerHTML = amlak.amlak;
-        }
-    });
 }
 function extractContentWrap() {
     let rootUl = $(".multiarticles.mta_4 > .content_wrap > .mta_pic_items, .multiarticles.mta_3 > .content_wrap > .mta_pic_items");
@@ -292,9 +292,6 @@ function BuildMTAItems(ul) {
             subElement.innerHTML = amlak.amlak;
         }
     });
-    // $("ul.mta_items > li").each((index, element) => {
-    //   }
-    // });
 }
 function adjustHeights() {
     console.log("### Adjust Heights");
