@@ -100,7 +100,6 @@ function extractHomePage(data) {
     console.log("extracting home page");
     extractMainTitles();
     removeBanners();
-    //extractStr3s();
     extractContentWrap();
     adjustHeights();
 }
@@ -129,30 +128,6 @@ function extractMainTitles() {
             parentDiv.append(divClone);
         console.log("------------------");
     });
-}
-function buildClonedTitle(rootDiv) {
-    // str3s str3s_small str3s_type_small
-    console.log(`building cloned title: ${rootDiv.attr("class")}`);
-    let title = rootDiv.find("div.title").text();
-    console.log(`title: ${title}`);
-    let a = rootDiv.find("a.str3s_img");
-    let linkUrl = a.attr("href");
-    console.log("linkUrl: " + linkUrl);
-    if (linkUrl === undefined)
-        return;
-    let id = linkUrl
-        .substring(0, linkUrl.lastIndexOf(".html"))
-        .split("/")
-        .pop();
-    console.log("id: " + id);
-    //let imgLink = a.find("img").attr("src");
-    let article = mtaItemsArticles.filter(value => value.id === id)[0];
-    if (article === undefined)
-        return undefined;
-    console.log("found article");
-    let subtitleDiv = rootDiv.find("div.sub_title.sub_title_no_credit");
-    subtitleDiv.text(article.amlak);
-    return rootDiv;
 }
 function buildTitle(rootDiv) {
     rootDiv.removeClass();
@@ -188,38 +163,6 @@ function buildTitle(rootDiv) {
         
         </div>`);
     return e;
-}
-function extractStr3s() {
-    let heightArray = [];
-    $("div.str3s_txt").each((index, element) => {
-        let article = Helpers.ExtractStr3s(element);
-        if (article === undefined) {
-            heightArray.push(0);
-            return;
-        }
-        let result = mtaItemsArticles.filter(value => value.id === article.id);
-        if (result.length != 1) {
-            heightArray.push(0);
-            return;
-        }
-        let amlak = result[0];
-        let numOfLines = Math.ceil(amlak.amlak.length / 52);
-        let height = numOfLines * 17 + 50;
-        heightArray.push(height);
-        // p.css("height", "120px");
-        $(element).css("height", height);
-        let subElement = $(element)
-            .children()
-            .get(1);
-        //subElement.remove();
-        subElement.innerHTML = amlak.amlak;
-    });
-    let maxHeight = Math.max(...heightArray);
-    if (maxHeight != undefined && maxHeight != 0) {
-        $(".str3s_small.str3s_type_small,.str3s_small.str3s_type_small > .cell,.str3s_small.str3s_type_small > .cell > a,.str3s_small.str3s_type_small > .cell > .str3s_img > img").each((index, element) => {
-            $(element).css("height", maxHeight);
-        });
-    }
 }
 function extractArticle() {
     let article = new Article();
