@@ -108,10 +108,10 @@ function extractMainTitles() {
     let rootDiv = $(".str3s_small.str3s_type_small, .str3s_small.str3s_type_small > .cell, .str3s_small.str3s_type_small > .cell > a, .str3s_small.str3s_type_small > .cell > .str3s_img > img");
     console.log("total number of rootDivs found: " + rootDiv.length);
     let parentDiv = rootDiv.first().closest("div.block.B3");
+    let adsDiv = removeRightTitleAds(parentDiv.closest("div.block.B6"));
     console.log(`number of parent div for "${parentDiv.attr("class")}": ${parentDiv.length}`);
     let parentDivCloned = parentDiv.clone(true);
     parentDiv.empty();
-    let clones = [];
     parentDivCloned.children().each((index, element) => {
         let div = $(element);
         console.log(`title number: ${index}`);
@@ -119,15 +119,28 @@ function extractMainTitles() {
         console.log(`title div element name: ${divChildClass}`);
         if (divChildClass != "str3s str3s_small str3s_type_small")
             return;
-        // console.log("number of titles div found: " + parentDiv.length);
         let divClone = div.clone(true);
         let e = buildTitle(divClone);
+        let selectedDiv = parentDiv;
+        if (index % 2 != 0)
+            selectedDiv = adsDiv;
         if (e != undefined)
-            parentDiv.append(e);
+            selectedDiv.append(e);
         else
-            parentDiv.append(divClone);
+            selectedDiv.append(divClone);
         console.log("------------------");
     });
+}
+function removeRightTitleAds(rootDiv) {
+    console.log(`B6 block found: ${rootDiv.attr("class")}`);
+    rootDiv.css("width", "1000px");
+    let adsDiv = rootDiv.find("div.block.B2b.spacer");
+    console.log(`ads div found ${adsDiv.attr("class")}`);
+    adsDiv.empty();
+    adsDiv.removeClass();
+    adsDiv.addClass("block B3 spacer");
+    adsDiv.css("margin-left", "20px");
+    return adsDiv;
 }
 function buildTitle(rootDiv) {
     rootDiv.removeClass();
@@ -157,9 +170,11 @@ function buildTitle(rootDiv) {
         </div>
        
   
+        <a href="${linkUrl}">
         <div class="str3s_txt">
         <div class="title" style="margin-top: 16px;margin-right: -10px;text-align: right;color:#FFFFFF;line-height:22px">${title}</div>
         <div class="sub_title sub_title_no_credit" style="margin: 3px 10px 16px 10px; text-align: right;color:#FFFFFF;line-height:17px">${article.amlak}</div>
+        </a>
         
         </div>`);
     return e;
