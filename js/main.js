@@ -185,6 +185,15 @@ function buildTitle(rootDiv) {
     let amlak = subtitleDiv.text();
     if (article != undefined)
         amlak = article.amlak;
+    let aFirstChild = a.children().first();
+    console.log(aFirstChild);
+    // if (aFirstChild === undefined) {
+    //   console.log("a child is undefined");
+    // }
+    // if (aFirstChild.not("img")) {
+    //   console.log("not image");
+    //   console.log(aFirstChild.html());
+    // }
     let e = $.parseHTML(`<div style="clear: both;background: ${background};margin-bottom: 16px;min-height: 118px">
         <div style="margin-right: 3px"><a href="${linkUrl}"><img style="float:right;overflow:auto;clear:both;margin-top: 20px" src="${imgLink}"></a>
         </div>
@@ -248,7 +257,6 @@ function buildMTAPicDiv(ul, div) {
         <div style="margin-right: 10px"><a href="${linkUrl}" style="text-decoration:none;color: #000000">${amlak}</a></div>
         
         </div>`);
-    console.log("pushing " + $(e).html());
     div.append(e);
 }
 function BuildMTAItems(ul) {
@@ -273,7 +281,6 @@ function adjustHeights() {
     console.log("### Adjust Heights");
     $("div.block.B6").each((index, element) => {
         let divs = $(element).find("div.content_wrap");
-        console.log("div.content_wrap found: " + divs.length);
         let heights = [];
         if (divs.length === 2) {
             divs.each((index, element) => {
@@ -290,7 +297,7 @@ function adjustHeights() {
             });
         }
         // console.log("Number of content_wrap divs: " + div.length);
-        console.log($(element).attr("class"));
-        console.log("content_wraps found: " + divs.length);
+        //console.log($(element).attr("class"));
+        //console.log("content_wraps found: " + divs.length);
     });
 }

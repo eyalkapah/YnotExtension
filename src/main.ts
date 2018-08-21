@@ -275,6 +275,16 @@ function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
 
   if (article != undefined) amlak = article.amlak;
 
+  let aFirstChild = a.children().first();
+  console.log(aFirstChild);
+  // if (aFirstChild === undefined) {
+  //   console.log("a child is undefined");
+  // }
+  // if (aFirstChild.not("img")) {
+  //   console.log("not image");
+  //   console.log(aFirstChild.html());
+  // }
+
   let e = $.parseHTML(
     `<div style="clear: both;background: ${background};margin-bottom: 16px;min-height: 118px">
         <div style="margin-right: 3px"><a href="${linkUrl}"><img style="float:right;overflow:auto;clear:both;margin-top: 20px" src="${imgLink}"></a>
@@ -365,8 +375,6 @@ function buildMTAPicDiv(ul: JQuery<HTMLElement>, div: JQuery<HTMLElement>) {
         </div>`
   );
 
-  console.log("pushing " + $(e).html());
-
   div.append(e);
 }
 
@@ -399,8 +407,6 @@ function adjustHeights() {
   $("div.block.B6").each((index, element) => {
     let divs = $(element).find("div.content_wrap");
 
-    console.log("div.content_wrap found: " + divs.length);
-
     let heights: number[] = [];
     if (divs.length === 2) {
       divs.each((index, element) => {
@@ -420,8 +426,8 @@ function adjustHeights() {
       });
     }
     // console.log("Number of content_wrap divs: " + div.length);
-    console.log($(element).attr("class"));
+    //console.log($(element).attr("class"));
 
-    console.log("content_wraps found: " + divs.length);
+    //console.log("content_wraps found: " + divs.length);
   });
 }
