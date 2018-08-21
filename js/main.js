@@ -185,8 +185,24 @@ function buildTitle(rootDiv) {
     let amlak = subtitleDiv.text();
     if (article != undefined)
         amlak = article.amlak;
-    let aFirstChild = a.children().first();
-    console.log(aFirstChild);
+    let addon;
+    a.children().each((index, element) => {
+        // if ($(element).is("div")) {
+        //   console.log("saving: " + element);
+        //   addon = element;
+        // }
+        if (index === 0) {
+            addon = element;
+            console.log("inner: " + element.innerHTML);
+            console.log("outer: " + element.outerHTML);
+            addon.style.height = "29px";
+            addon.style.width = "29px";
+            addon.style.zIndex = "999";
+            addon.style.position = "absolute";
+        }
+    });
+    // let aFirstChild = a.children().first();
+    // console.log(aFirstChild.html());
     // if (aFirstChild === undefined) {
     //   console.log("a child is undefined");
     // }
@@ -195,12 +211,17 @@ function buildTitle(rootDiv) {
     //   console.log(aFirstChild.html());
     // }
     let e = $.parseHTML(`<div style="clear: both;background: ${background};margin-bottom: 16px;min-height: 118px">
-        <div style="margin-right: 3px"><a href="${linkUrl}"><img style="float:right;overflow:auto;clear:both;margin-top: 20px" src="${imgLink}"></a>
+        <div class="cell cshort layout1" style="margin-right: 3px"><a class="str3s_img" href="${linkUrl} style="float:right">
+        <div style="float:right;display=block;position:relative">
+        <div style="position:absolute;bottom:3px;left:3px;z-index:999;width:29px;height:29px;background:url('/images/small_play_new.png') no-repeat"></div>
+        <img style="float:right;overflow:auto;clear:both;margin-top: 20px;max-height:88px;max-width:155px" src="${imgLink}">
+        </div>
+        </a>
         </div>
        
   
         <div class="str3s_txt">
-        <div class="title" style="margin-top: 16px;margin-right: -10px;text-align: right;color:#FFFFFF;line-height:22px"><a href="${linkUrl}" style="text-decoration:none;color: #FFFFFF">${title}</a></div>
+        <div class="title" style="direction:rtl;margin-top: 16px;margin-right: -10px;text-align: right;color:#FFFFFF;line-height:22px"><a href="${linkUrl}" style="text-decoration:none;color: #FFFFFF">${title}</a></div>
         <div class="sub_title sub_title_no_credit" style="margin: 3px 10px 16px 10px; text-align: right;color:#FFFFFF;line-height:17px">
         <a href="${linkUrl}" style="text-decoration:none;color: #FFFFFF">${amlak}</a></div>
         </div>`);
