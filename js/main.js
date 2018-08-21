@@ -130,6 +130,24 @@ function extractMainTitles() {
             selectedDiv.append(divClone);
         console.log("------------------");
     });
+    adjustTitlesHeight(parentDiv, adsDiv);
+}
+function adjustTitlesHeight(leftDiv, rightDiv) {
+    console.log("adjust titles heights");
+    leftDiv.children().each((index, element) => {
+        let leftTitle = $(element);
+        let leftHeight = leftTitle.height();
+        let rightTitle = $(rightDiv.children().get(index));
+        if (rightTitle == undefined)
+            return;
+        let rightHeight = $(rightTitle).height();
+        console.log(`${leftHeight}px : ${rightHeight}px`);
+        if (leftHeight === rightHeight)
+            return;
+        let height = Math.max(leftHeight, rightHeight);
+        leftTitle.height(height);
+        rightTitle.height(height);
+    });
 }
 function removeRightTitleAds(rootDiv) {
     console.log(`B6 block found: ${rootDiv.attr("class")}`);
@@ -160,22 +178,22 @@ function buildTitle(rootDiv) {
     console.log("id: " + id);
     let imgLink = a.find("img").attr("src");
     let article = mtaItemsArticles.filter(value => value.id === id)[0];
-    if (article === undefined)
-        return;
     console.log(`article found for id: ${id}`);
     let titleDiv = rootDiv.find("div.title");
     let title = titleDiv.text();
+    let subtitleDiv = rootDiv.find("div.sub_title");
+    let amlak = subtitleDiv.text();
+    if (article != undefined)
+        amlak = article.amlak;
     let e = $.parseHTML(`<div style="clear: both;background: ${background};margin-bottom: 16px;min-height: 118px">
         <div style="margin-right: 3px"><a href="${linkUrl}"><img style="float:right;overflow:auto;clear:both;margin-top: 20px" src="${imgLink}"></a>
         </div>
        
   
-        <a href="${linkUrl}">
         <div class="str3s_txt">
-        <div class="title" style="margin-top: 16px;margin-right: -10px;text-align: right;color:#FFFFFF;line-height:22px">${title}</div>
-        <div class="sub_title sub_title_no_credit" style="margin: 3px 10px 16px 10px; text-align: right;color:#FFFFFF;line-height:17px">${article.amlak}</div>
-        </a>
-        
+        <div class="title" style="margin-top: 16px;margin-right: -10px;text-align: right;color:#FFFFFF;line-height:22px"><a href="${linkUrl}" style="text-decoration:none;color: #FFFFFF">${title}</a></div>
+        <div class="sub_title sub_title_no_credit" style="margin: 3px 10px 16px 10px; text-align: right;color:#FFFFFF;line-height:17px">
+        <a href="${linkUrl}" style="text-decoration:none;color: #FFFFFF">${amlak}</a></div>
         </div>`);
     return e;
 }
@@ -221,13 +239,13 @@ function buildMTAPicDiv(ul, div) {
     if (article != undefined)
         amlak = article.amlak;
     let e = $.parseHTML(`<div style="clear: both">
-        <div ><a href="${linkUrl}"><img style="float:right;overflow:auto;clear:both" src="${imgLink}"></a>
+        <div ><a href="${linkUrl}"><img style="float:right;overflow:auto;clear:both;max-height:88px;max-width:155px" src="${imgLink}"></a>
         </div>
        
   
         <div class="str3s_txt">
-        <div class="title" style="margin-right: 10px">${title}</div>
-        <div style="margin-right: 10px">${amlak}</div>
+        <div class="title" style="margin-right: 10px"><a href="${linkUrl}" style="text-decoration:none;color: #000000">${title}</a></div>
+        <div style="margin-right: 10px"><a href="${linkUrl}" style="text-decoration:none;color: #000000">${amlak}</a></div>
         
         </div>`);
     console.log("pushing " + $(e).html());
