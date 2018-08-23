@@ -275,8 +275,31 @@ function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
 
   if (article != undefined) amlak = article.amlak;
 
-  let aFirstChild = a.children().first();
-  console.log(aFirstChild);
+  let addon: HTMLElement;
+  a.children().each((index, element) => {
+    // if ($(element).is("div")) {
+    //   console.log("saving: " + element);
+    //   addon = element;
+    // }
+    if (index === 0) {
+      addon = element;
+      console.log("inner: " + element.innerHTML);
+      console.log("outer: " + element.outerHTML);
+      addon.style.height = "29px";
+      addon.style.width = "29px";
+      addon.style.zIndex = "999";
+      addon.style.position = "absolute";
+    }
+  });
+  // let aFirstChild = a.children().first();
+  // console.log(aFirstChild.html());
+  // if (aFirstChild === undefined) {
+  //   console.log("a child is undefined");
+  // }
+  // if (aFirstChild.not("img")) {
+  //   console.log("not image");
+  //   console.log(aFirstChild.html());
+  // }
 
   let e = $.parseHTML(
     `<div style="clear: both;background: ${background};margin-bottom: 16px;min-height: 118px">
