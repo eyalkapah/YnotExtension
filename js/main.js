@@ -187,20 +187,18 @@ function buildTitle(rootDiv) {
         amlak = article.amlak;
     let aFirstChild = a.children().first();
     console.log(aFirstChild);
-    // if (aFirstChild === undefined) {
-    //   console.log("a child is undefined");
-    // }
-    // if (aFirstChild.not("img")) {
-    //   console.log("not image");
-    //   console.log(aFirstChild.html());
-    // }
     let e = $.parseHTML(`<div style="clear: both;background: ${background};margin-bottom: 16px;min-height: 118px">
-        <div style="margin-right: 3px"><a href="${linkUrl}"><img style="float:right;overflow:auto;clear:both;margin-top: 20px" src="${imgLink}"></a>
+        <div class="cell cshort layout1" style="margin-right: 3px"><a class="str3s_img" href="${linkUrl} style="float:right">
+        <div style="float:right;display=block;position:relative">
+        <div style="position:absolute;bottom:3px;left:3px;z-index:999;width:29px;height:29px;background:url('/images/small_play_new.png') no-repeat"></div>
+        <img style="float:right;overflow:auto;clear:both;margin-top: 20px;max-height:88px;max-width:155px" src="${imgLink}">
+        </div>
+        </a>
         </div>
        
   
         <div class="str3s_txt">
-        <div class="title" style="margin-top: 16px;margin-right: -10px;text-align: right;color:#FFFFFF;line-height:22px"><a href="${linkUrl}" style="text-decoration:none;color: #FFFFFF">${title}</a></div>
+        <div class="title" style="direction:rtl;margin-top: 16px;margin-right: -10px;text-align: right;color:#FFFFFF;line-height:22px"><a href="${linkUrl}" style="text-decoration:none;color: #FFFFFF">${title}</a></div>
         <div class="sub_title sub_title_no_credit" style="margin: 3px 10px 16px 10px; text-align: right;color:#FFFFFF;line-height:17px">
         <a href="${linkUrl}" style="text-decoration:none;color: #FFFFFF">${amlak}</a></div>
         </div>`);
@@ -270,10 +268,17 @@ function BuildMTAItems(ul) {
             return;
         let amlak = result[0];
         if (article != undefined) {
-            let subElement = $(element)
+            let amlakDiv = `<div class="mta_gray_text" style="color:#000000">${amlak.amlak}</div>`;
+            let title = $(element)
                 .children()
-                .get(1);
-            subElement.innerHTML = amlak.amlak;
+                .get(0);
+            let authorDiv = $($(element)
+                .children()
+                .get(1)).clone(true);
+            $(element).empty();
+            $(element).append(title);
+            $(element).append(amlakDiv);
+            $(element).append(authorDiv);
         }
     });
 }
