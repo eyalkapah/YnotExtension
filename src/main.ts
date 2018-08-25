@@ -1,3 +1,18 @@
+// chrome.runtime.onInstalled.addListener(() => {
+//   chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
+//     chrome.declarativeContent.onPageChanged.addRules([
+//       {
+//         conditions: [
+//           new chrome.declarativeContent.PageStateMatcher({
+//             pageUrl: { urlContains: "https://www.ynet.co.il/*" }
+//           })
+//         ],
+//         actions: [new chrome.declarativeContent.ShowPageAction()]
+//       }
+//     ]);
+//   });
+// });
+
 let mtaItemsArticles: Article[] = [];
 
 class Article {
@@ -291,15 +306,6 @@ function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
       addon.style.position = "absolute";
     }
   });
-  // let aFirstChild = a.children().first();
-  // console.log(aFirstChild.html());
-  // if (aFirstChild === undefined) {
-  //   console.log("a child is undefined");
-  // }
-  // if (aFirstChild.not("img")) {
-  //   console.log("not image");
-  //   console.log(aFirstChild.html());
-  // }
 
   let e = $.parseHTML(
     `<div style="clear: both;background: ${background};margin-bottom: 16px;min-height: 118px">
