@@ -4,26 +4,12 @@
   "name": "No Click Bait Plugin",
   "description": "This extension will give you information without clicking",
   "version": "1.0",
+  "browser_action": {
+    "default_icon": "./icon.png",
+    "default_popup": "popup.html"
+  },
 
-  "page_action": {
-    "default_popup": "popup.html",
-    "default_icon": {
-      "16": "./icon.png",
-      "32": "./icon.png",
-      "48": "./icon.png",
-      "128": "./icon.png"
-    }
-  },
-  "commands": {
-    "_execute_browser_action": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+F",
-        "mac": "MacCtrl+Shift+F"
-      },
-      "description": "Run anti click bait"
-    }
-  },
-  "permissions": ["declarativeContent", "activeTab"],
+  "permissions": ["storage", "activeTab"],
   "content_scripts": [
     {
       "matches": ["https://www.ynet.co.il/*"],

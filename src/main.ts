@@ -13,6 +13,17 @@
 //   });
 // });
 
+let isMainTitlesEnabled = true;
+let isArticlesEnabled = true;
+
+chrome.storage.sync.get(["mainTitles", "articles"], data => {
+  console.log(`mainTitles is: ${data.mainTitles}`);
+  isMainTitlesEnabled = data.mainTitles;
+
+  console.log(`articles is: ${data.articles}`);
+  isArticlesEnabled = data.articles;
+});
+
 let mtaItemsArticles: Article[] = [];
 
 class Article {
@@ -31,48 +42,6 @@ enum UrlType {
 }
 
 class Helpers {
-  static ExtractStr3s(element: HTMLElement): Article | undefined {
-    let titleElement = element.querySelector(".title");
-
-    if (titleElement === null) return undefined;
-
-    let title = titleElement.innerHTML;
-
-    var subTitleElement = element.querySelector(".sub_title");
-
-    if (subTitleElement === null) return undefined;
-
-    let subtitle = subTitleElement.innerHTML;
-
-    let linkParent = element.closest("a");
-
-    if (linkParent != null) {
-      let linkUrl = linkParent.href.substring(
-        0,
-        linkParent.href.lastIndexOf(".html")
-      );
-
-      let id = linkUrl.split("/").pop();
-
-      if (
-        title != undefined &&
-        id != undefined &&
-        linkUrl != undefined &&
-        subtitle != null
-      ) {
-        let article = new Article();
-        article.id = id;
-        article.title = title;
-        article.link = linkUrl;
-        article.subtitle = subtitle;
-
-        return article;
-      }
-    }
-
-    return undefined;
-  }
-
   static SaveMtaItemAsArticle(element: HTMLElement): Article | undefined {
     let aElement = <HTMLAnchorElement>element.querySelector(".mta_title");
 
@@ -162,10 +131,10 @@ function extractHomePage(data: Array<Article>) {
   mtaItemsArticles = data;
 
   console.log("extracting home page");
-  extractMainTitles();
+
+  if (isMainTitlesEnabled) extractMainTitles();
   removeBanners();
-  extractContentWrap();
-  adjustHeights();
+  if (isArticlesEnabled) extractContentWrap();
 }
 
 function extractMainTitles() {
@@ -364,6 +333,8 @@ function extractContentWrap() {
 
     div.append(ulMtaItems);
   });
+
+  adjustHeights();
 }
 
 function buildMTAPicDiv(ul: JQuery<HTMLElement>, div: JQuery<HTMLElement>) {
