@@ -5,7 +5,12 @@
   "description": "This extension will give you information without clicking",
   "version": "1.0",
   "browser_action": {
-    "default_icon": "./icon.png",
+    "default_icon": {
+      "16": "./assets/ynet16.png",
+      "32": "./assets/ynet32.png",
+      "48": "./assets/ynet48.png",
+      "128": "./assets/ynet128.png"
+    },
     "default_popup": "popup.html"
   },
 
@@ -15,5 +20,11 @@
       "matches": ["https://www.ynet.co.il/*"],
       "js": ["./jquery.min.js", "./js/main.js"]
     }
-  ]
+  ],
+  "icons": {
+    "16": "./assets/ynet16.png",
+    "32": "./assets/ynet32.png",
+    "48": "./assets/ynet48.png",
+    "128": "./assets/ynet128.png"
+  }
 }
