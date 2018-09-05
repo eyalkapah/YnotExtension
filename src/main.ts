@@ -1,20 +1,6 @@
-// chrome.runtime.onInstalled.addListener(() => {
-//   chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
-//     chrome.declarativeContent.onPageChanged.addRules([
-//       {
-//         conditions: [
-//           new chrome.declarativeContent.PageStateMatcher({
-//             pageUrl: { urlContains: "https://www.ynet.co.il/*" }
-//           })
-//         ],
-//         actions: [new chrome.declarativeContent.ShowPageAction()]
-//       }
-//     ]);
-//   });
-// });
-
 let isMainTitlesEnabled = true;
 let isArticlesEnabled = true;
+const serverUrl = "https://myynot.azurewebsites.net";
 
 chrome.storage.sync.get(["mainTitles", "articles"], data => {
   console.log(`mainTitles is: ${data.mainTitles}`);
@@ -101,7 +87,7 @@ $(document).ready(() => {
 
   if (pageType === UrlType.Home) {
     $.get({
-      url: "https://localhost:44320/api/articles",
+      url: `${serverUrl}/api/articles`,
       dataType: "json",
       success: data => {
         extractHomePage(data);
@@ -120,7 +106,7 @@ $(document).ready(() => {
 
     console.log("id = " + article.id);
 
-    let baseUrl = "https://localhost:44320/api/articles";
+    let baseUrl = `${serverUrl}/api/articles`;
 
     $.post(baseUrl, article);
     // send amlak to server
