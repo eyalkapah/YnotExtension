@@ -130,18 +130,21 @@ function extractMainTitles() {
     ".str3s_small.str3s_type_small, .str3s_small.str3s_type_small > .cell, .str3s_small.str3s_type_small > .cell > a, .str3s_small.str3s_type_small > .cell > .str3s_img > img"
   );
 
-  console.log("total number of rootDivs found: " + rootDiv.length);
-
   let parentDiv = rootDiv.first().closest("div.block.B3");
-
   let adsDiv = removeRightTitleAds(parentDiv.closest("div.block.B6"));
-
-  console.log(
-    `number of parent div for "${parentDiv.attr("class")}": ${parentDiv.length}`
-  );
 
   let parentDivCloned = parentDiv.clone(true);
   parentDiv.empty();
+
+  let homePageMiniTitles = parentDivCloned
+    .find("div.homepageministrip.hpstrip_new")
+    .parent("div.element.B3.ghcite.noBottomPadding");
+
+  if (homePageMiniTitles === null) {
+    console.log("mini titles not found!");
+  } else {
+    console.log(`mini titles: ${homePageMiniTitles.html()}`);
+  }
 
   parentDivCloned.children().each((index, element) => {
     let div = $(element);
@@ -165,10 +168,13 @@ function extractMainTitles() {
     if (e != undefined) selectedDiv.append(e);
     else selectedDiv.append(divClone);
 
+    selectedDiv.append(homePageMiniTitles);
     console.log("------------------");
   });
 
   adjustTitlesHeight(parentDiv, adsDiv);
+
+  adsDiv.append(homePageMiniTitles);
 }
 
 function adjustTitlesHeight(
