@@ -1,14 +1,3 @@
-function getDefaultSettings() {
-    chrome.storage.sync.get(["mainTitles", "articles"], data => {
-        if (data.mainTitles === undefined) {
-            chrome.storage.sync.set({ mainTitles: true });
-        }
-        if (data.articles === undefined) {
-            chrome.storage.sync.set({ articles: true });
-        }
-    });
-}
-getDefaultSettings();
 document.addEventListener("DOMContentLoaded", function () {
     let mainTitlesCheckBox = (document.getElementsByName("mainTitlesCheckBox")[0]);
     let articlesCheckBox = (document.getElementsByName("articlesCheckBox")[0]);

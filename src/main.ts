@@ -1,6 +1,9 @@
 let isMainTitlesEnabled = true;
 let isArticlesEnabled = true;
 const serverUrl = "https://myynot.azurewebsites.net";
+let mtaItemsArticles: Article[] = [];
+
+
 
 chrome.storage.sync.get(["mainTitles", "articles"], data => {
   console.log(`mainTitles is: ${data.mainTitles}`);
@@ -9,8 +12,6 @@ chrome.storage.sync.get(["mainTitles", "articles"], data => {
   console.log(`articles is: ${data.articles}`);
   isArticlesEnabled = data.articles;
 });
-
-let mtaItemsArticles: Article[] = [];
 
 class Article {
   title: string;

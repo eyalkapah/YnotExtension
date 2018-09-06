@@ -13,7 +13,10 @@
     },
     "default_popup": "popup.html"
   },
-
+  "background": {
+    "scripts": ["./js/background.js"],
+    "persistent": false
+  },
   "permissions": ["storage", "activeTab"],
   "content_scripts": [
     {
