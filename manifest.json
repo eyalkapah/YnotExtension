@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
 
-  "name": "No Click Bait Plugin",
+  "name": "Ynet Anti Click Bait",
   "description": "This extension will give you information without clicking",
-  "version": "1.0",
+  "version": "1.02",
   "browser_action": {
     "default_icon": {
       "16": "./assets/ynet16.png",
