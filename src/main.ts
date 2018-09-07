@@ -2,14 +2,13 @@ let isMainTitlesEnabled = true;
 let isArticlesEnabled = true;
 const serverUrl = "https://myynot.azurewebsites.net";
 let mtaItemsArticles: Article[] = [];
-
-
+let isDebug = false;
 
 chrome.storage.sync.get(["mainTitles", "articles"], data => {
-  console.log(`mainTitles is: ${data.mainTitles}`);
+  log(`mainTitles is: ${data.mainTitles}`);
   isMainTitlesEnabled = data.mainTitles;
 
-  console.log(`articles is: ${data.articles}`);
+  log(`articles is: ${data.articles}`);
   isArticlesEnabled = data.articles;
 });
 
@@ -28,13 +27,14 @@ enum UrlType {
   Article
 }
 
+function log(message: string) {
+  if (isDebug) log(message);
+}
 class Helpers {
   static SaveMtaItemAsArticle(element: HTMLElement): Article | undefined {
     let aElement = <HTMLAnchorElement>element.querySelector(".mta_title");
 
     if (aElement === null) return undefined;
-
-    // if ($(element).children().length > 0) return undefined;
 
     let title = aElement.innerHTML;
 
@@ -95,29 +95,28 @@ $(document).ready(() => {
       }
     });
   } else if (pageType === UrlType.Article) {
-    console.log("Send Amlak");
+    log("Send Amlak");
 
     let article = extractArticle();
 
     let linkUrl = document.URL.substring(0, document.URL.lastIndexOf(".html"));
 
-    console.log("linkUrl = " + linkUrl);
+    log("linkUrl = " + linkUrl);
 
     article.id = linkUrl.split("/").pop();
 
-    console.log("id = " + article.id);
+    log("id = " + article.id);
 
     let baseUrl = `${serverUrl}/api/articles`;
 
     $.post(baseUrl, article);
-    // send amlak to server
   }
 });
 
 function extractHomePage(data: Array<Article>) {
   mtaItemsArticles = data;
 
-  console.log("extracting home page");
+  log("extracting home page");
 
   if (isMainTitlesEnabled) extractMainTitles();
   removeBanners();
@@ -125,7 +124,7 @@ function extractHomePage(data: Array<Article>) {
 }
 
 function extractMainTitles() {
-  console.log("extracting main titles");
+  log("extracting main titles");
 
   let rootDiv = $(
     ".str3s_small.str3s_type_small, .str3s_small.str3s_type_small > .cell, .str3s_small.str3s_type_small > .cell > a, .str3s_small.str3s_type_small > .cell > .str3s_img > img"
@@ -141,20 +140,12 @@ function extractMainTitles() {
     .find("div.homepageministrip.hpstrip_new")
     .parent("div.element.B3.ghcite.noBottomPadding");
 
-  if (homePageMiniTitles === null) {
-    console.log("mini titles not found!");
-  } else {
-    console.log(`mini titles: ${homePageMiniTitles.html()}`);
-  }
-
   parentDivCloned.children().each((index, element) => {
     let div = $(element);
 
-    console.log(`title number: ${index}`);
+    log(`title number: ${index}`);
 
     let divChildClass = div.find(":first-child").attr("class");
-
-    console.log(`title div element name: ${divChildClass}`);
 
     if (divChildClass != "str3s str3s_small str3s_type_small") return;
 
@@ -170,7 +161,7 @@ function extractMainTitles() {
     else selectedDiv.append(divClone);
 
     selectedDiv.append(homePageMiniTitles);
-    console.log("------------------");
+    log("------------------");
   });
 
   adjustTitlesHeight(parentDiv, adsDiv);
@@ -182,7 +173,7 @@ function adjustTitlesHeight(
   leftDiv: JQuery<HTMLElement>,
   rightDiv: JQuery<HTMLElement>
 ) {
-  console.log("adjust titles heights");
+  log("adjust titles heights");
 
   leftDiv.children().each((index, element) => {
     let leftTitle = $(element);
@@ -193,7 +184,7 @@ function adjustTitlesHeight(
 
     let rightHeight = $(rightTitle).height();
 
-    console.log(`${leftHeight}px : ${rightHeight}px`);
+    log(`${leftHeight}px : ${rightHeight}px`);
 
     if (leftHeight === rightHeight) return;
 
@@ -204,12 +195,12 @@ function adjustTitlesHeight(
 }
 
 function removeRightTitleAds(rootDiv: JQuery<HTMLElement>) {
-  console.log(`B6 block found: ${rootDiv.attr("class")}`);
+  log(`B6 block found: ${rootDiv.attr("class")}`);
 
   rootDiv.css("width", "1000px");
   let adsDiv = rootDiv.find("div.block.B2b.spacer");
 
-  console.log(`ads div found ${adsDiv.attr("class")}`);
+  log(`ads div found ${adsDiv.attr("class")}`);
   adsDiv.empty();
   adsDiv.removeClass();
   adsDiv.addClass("block B3 spacer");
@@ -224,11 +215,10 @@ function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
   let background = rootDiv
     .find("div.str3s.str3s_small.str3s_type_small")
     .css("background");
-  console.log(`background found: ${background}`);
 
   let a = rootDiv.find("a.str3s_img");
   let linkUrl = a.attr("href");
-  console.log("linkUrl: " + linkUrl);
+  log("linkUrl: " + linkUrl);
 
   if (linkUrl === undefined) return;
 
@@ -236,13 +226,13 @@ function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
     .substring(0, linkUrl.lastIndexOf(".html"))
     .split("/")
     .pop();
-  console.log("id: " + id);
+  log("id: " + id);
 
   let imgLink = a.find("img").attr("src");
 
   let article = mtaItemsArticles.filter(value => value.id === id)[0];
 
-  console.log(`article found for id: ${id}`);
+  log(`article found for id: ${id}`);
 
   let titleDiv = rootDiv.find("div.title");
   let title = titleDiv.text();
@@ -254,14 +244,8 @@ function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
 
   let addon: HTMLElement;
   a.children().each((index, element) => {
-    // if ($(element).is("div")) {
-    //   console.log("saving: " + element);
-    //   addon = element;
-    // }
     if (index === 0) {
       addon = element;
-      console.log("inner: " + element.innerHTML);
-      console.log("outer: " + element.outerHTML);
       addon.style.height = "29px";
       addon.style.width = "29px";
       addon.style.zIndex = "999";
@@ -313,8 +297,6 @@ function extractContentWrap() {
     let ul = $(element);
     let div = ul.parent();
 
-    console.log("number of parents " + div.length);
-
     let ulMtaItems = div.find("ul.mta_items").clone(true);
     ulMtaItems.css("clear", "both");
     ulMtaItems.css("padding-top", "10px");
@@ -332,7 +314,7 @@ function extractContentWrap() {
 
 function buildMTAPicDiv(ul: JQuery<HTMLElement>, div: JQuery<HTMLElement>) {
   let linkUrl = ul.find("a.mta_pic_link").attr("href");
-  console.log("linkUrl: " + linkUrl);
+  log("linkUrl: " + linkUrl);
 
   if (linkUrl === undefined) return;
 
@@ -340,13 +322,13 @@ function buildMTAPicDiv(ul: JQuery<HTMLElement>, div: JQuery<HTMLElement>) {
     .substring(0, linkUrl.lastIndexOf(".html"))
     .split("/")
     .pop();
-  console.log("id: " + id);
+  log("id: " + id);
 
   let imgLink = ul.find("img.mta_pic").attr("src");
-  console.log("imgLink: " + imgLink);
+  log("imgLink: " + imgLink);
 
   let title = ul.find("a.mta_title").text();
-  console.log("title: " + title);
+  log("title: " + title);
 
   let article = mtaItemsArticles.filter(value => value.id === id)[0];
 
@@ -408,7 +390,7 @@ function BuildMTAItems(ul: JQuery<HTMLElement>) {
 }
 
 function adjustHeights() {
-  console.log("### Adjust Heights");
+  log("### Adjust Heights");
   $("div.block.B6").each((index, element) => {
     let divs = $(element).find("div.content_wrap");
 
@@ -417,12 +399,12 @@ function adjustHeights() {
       divs.each((index, element) => {
         heights.push($(element).height());
         // let height = $(element).attr("height");
-        // console.log("height found: " + height);
+        // log("height found: " + height);
       });
 
       let maxHeight = Math.max(...heights);
 
-      console.log("max height found: " + maxHeight);
+      log("max height found: " + maxHeight);
 
       divs.each((index, element) => {
         if ($(element).height() != maxHeight) {
@@ -430,9 +412,9 @@ function adjustHeights() {
         }
       });
     }
-    // console.log("Number of content_wrap divs: " + div.length);
-    //console.log($(element).attr("class"));
+    // log("Number of content_wrap divs: " + div.length);
+    //log($(element).attr("class"));
 
-    //console.log("content_wraps found: " + divs.length);
+    //log("content_wraps found: " + divs.length);
   });
 }
