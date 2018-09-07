@@ -132,6 +132,7 @@ function extractMainTitles() {
 
   let parentDiv = rootDiv.first().closest("div.block.B3");
   let adsDiv = removeRightTitleAds(parentDiv.closest("div.block.B6"));
+  adsDiv.empty();
 
   let parentDivCloned = parentDiv.clone(true);
   parentDiv.empty();
@@ -198,7 +199,10 @@ function removeRightTitleAds(rootDiv: JQuery<HTMLElement>) {
   log(`B6 block found: ${rootDiv.attr("class")}`);
 
   rootDiv.css("width", "1000px");
-  let adsDiv = rootDiv.find("div.block.B2b.spacer");
+  let adsDiv = rootDiv.find("div.block.B1.spacer");
+  adsDiv.empty();
+
+  adsDiv = rootDiv.find("div.block.B2b.spacer");
 
   log(`ads div found ${adsDiv.attr("class")}`);
   adsDiv.empty();
