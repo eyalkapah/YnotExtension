@@ -1,7 +1,0 @@
-class Article {
-  getDummy(): string {
-    return "Dummy";
-  }
-}
-
-export { Article };
