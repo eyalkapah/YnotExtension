@@ -24,6 +24,7 @@
       "js": ["./jquery.min.js", "./js/main.js"]
     }
   ],
+  "web_accessible_resources": ["disableAutoRefresh.js"],
   "icons": {
     "16": "./assets/ynet16.png",
     "32": "./assets/ynet32.png",

@@ -1,8 +1,10 @@
 let isMainTitlesEnabled = true;
 let isArticlesEnabled = true;
-const serverUrl = "https://myynot.azurewebsites.net";
+let serverUrl = "";
+const localUrl = "https://localhost:44320";
+const cloudUrl = "https://myynot.azurewebsites.net";
 let mtaItemsArticles: Article[] = [];
-let isDebug = false;
+let isDebug = true;
 
 chrome.storage.sync.get(["mainTitles", "articles"], data => {
   log(`mainTitles is: ${data.mainTitles}`);
@@ -10,6 +12,8 @@ chrome.storage.sync.get(["mainTitles", "articles"], data => {
 
   log(`articles is: ${data.articles}`);
   isArticlesEnabled = data.articles;
+
+  injectScript("disableAutoRefresh.js");
 });
 
 class Article {
@@ -18,8 +22,6 @@ class Article {
   amlak: string;
   id: string;
   link: string;
-  region: string;
-  imgLink: string;
 }
 
 enum UrlType {
@@ -28,8 +30,14 @@ enum UrlType {
 }
 
 function log(message: string) {
-  if (isDebug) log(message);
+  if (isDebug) console.log(message);
 }
+
+function initVariables() {
+  if (isDebug) serverUrl = localUrl;
+  else serverUrl = cloudUrl;
+}
+
 class Helpers {
   static SaveMtaItemAsArticle(element: HTMLElement): Article | undefined {
     let aElement = <HTMLAnchorElement>element.querySelector(".mta_title");
@@ -75,6 +83,14 @@ class Helpers {
 }
 
 function removeBanners() {
+  // let topAds = $("#ads.ozen.right");
+
+  // log("removing top ads");
+  // log(topAds.html());
+
+  // $("#ads.ozen.right").remove();
+  // $("#ads.top").remove();
+
   let element = $('div[data-tb-region*="News"]').first();
   let p = element.parentsUntil("div.block.B6").last();
   let p6 = p.parent();
@@ -84,6 +100,8 @@ function removeBanners() {
 }
 
 $(document).ready(() => {
+  initVariables();
+
   let pageType = Helpers.ExtractUrl(document.URL);
 
   if (pageType === UrlType.Home) {
@@ -123,6 +141,29 @@ function extractHomePage(data: Array<Article>) {
   if (isArticlesEnabled) extractContentWrap();
 }
 
+function injectScript(filename: string) {
+  log(`injecting script ${filename}`);
+
+  // let script = document.createElement("script");
+  // script.src = chrome.extension.getURL(filename);
+
+  // log(`chrome script url: ${script.src}`);
+
+  // (document.head || document.documentElement)!.appendChild(script);
+
+  // script.onload = function() {
+  //   log("removing loaded script");
+  //   script.parentNode!.removeChild(script);
+  // };
+
+  var s = document.createElement("script");
+  // TODO: add "script.js" to web_accessible_resources in manifest.json
+  s.src = chrome.extension.getURL(filename);
+  s.onload = function() {
+    this.remove();
+  };
+  (document.head || document.documentElement).appendChild(s);
+}
 function extractMainTitles() {
   log("extracting main titles");
 
