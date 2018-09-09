@@ -4,7 +4,7 @@ let serverUrl = "";
 const localUrl = "https://localhost:44320";
 const cloudUrl = "https://myynot.azurewebsites.net";
 let mtaItemsArticles: Article[] = [];
-let isDebug = true;
+let isDebug = false;
 
 chrome.storage.sync.get(["mainTitles", "articles"], data => {
   log(`mainTitles is: ${data.mainTitles}`);
@@ -83,13 +83,17 @@ class Helpers {
 }
 
 function removeBanners() {
-  // let topAds = $("#ads.ozen.right");
+  // remove google ads
+  var frame = document.getElementById("ads.top");
 
-  // log("removing top ads");
-  // log(topAds.html());
+  log(`frame: ${frame}`);
+  frame.parentNode.removeChild(frame);
 
-  // $("#ads.ozen.right").remove();
-  // $("#ads.top").remove();
+  frame = document.getElementById("ads.ozen.right");
+  frame.parentNode.removeChild(frame);
+
+  frame = document.getElementById("ads.mivzakon");
+  frame.parentNode.removeChild(frame);
 
   let element = $('div[data-tb-region*="News"]').first();
   let p = element.parentsUntil("div.block.B6").last();
@@ -144,20 +148,7 @@ function extractHomePage(data: Array<Article>) {
 function injectScript(filename: string) {
   log(`injecting script ${filename}`);
 
-  // let script = document.createElement("script");
-  // script.src = chrome.extension.getURL(filename);
-
-  // log(`chrome script url: ${script.src}`);
-
-  // (document.head || document.documentElement)!.appendChild(script);
-
-  // script.onload = function() {
-  //   log("removing loaded script");
-  //   script.parentNode!.removeChild(script);
-  // };
-
   var s = document.createElement("script");
-  // TODO: add "script.js" to web_accessible_resources in manifest.json
   s.src = chrome.extension.getURL(filename);
   s.onload = function() {
     this.remove();
