@@ -4,7 +4,7 @@ let serverUrl = "";
 const localUrl = "https://localhost:44320";
 const cloudUrl = "https://myynot.azurewebsites.net";
 let mtaItemsArticles: Article[] = [];
-let isDebug = false;
+let isDebug = true;
 
 chrome.storage.sync.get(["mainTitles", "articles"], data => {
   log(`mainTitles is: ${data.mainTitles}`);
@@ -82,18 +82,51 @@ class Helpers {
   }
 }
 
-function removeBanners() {
-  // remove google ads
-  var frame = document.getElementById("ads.top");
+function removeTaboolaAds() {
+  log("removing taboola ads");
 
-  log(`frame: ${frame}`);
-  frame.parentNode.removeChild(frame);
+  let taboolaElements = $("div[id^='taboola'");
+
+  taboolaElements.each((index, element) => {
+    let e = $(element);
+
+    log(`removing ${e.attr("id")}`);
+    e.remove();
+  });
+}
+function removeGoogleArticlePageAds() {
+  let ins = $("ins.adsbygoogle");
+  if (ins != null) ins.remove();
+
+  let bluelink = $("a.bluelink");
+  if (bluelink != null) {
+    let blueLinkParent = bluelink.parent("p");
+    if (blueLinkParent != null) blueLinkParent.remove();
+  }
+
+  let frame = document.getElementById("ads.mivzakon");
+  if (frame != null) frame.parentNode!.removeChild(frame);
+
+  let googleElements = $("div[id^='google'");
+
+  googleElements.each((index, element) => {
+    let e = $(element);
+    let parent = e.parent();
+
+    if (parent != null) parent.remove();
+  });
+}
+
+function removeGoogleGlobalAds() {
+  let frame = document.getElementById("ads.top");
+  if (frame != null) frame.parentNode.removeChild(frame);
 
   frame = document.getElementById("ads.ozen.right");
-  frame.parentNode.removeChild(frame);
-
-  frame = document.getElementById("ads.mivzakon");
-  frame.parentNode.removeChild(frame);
+  if (frame != null) frame.parentNode.removeChild(frame);
+}
+function removeBanners() {
+  // remove google ads
+  removeGoogleGlobalAds();
 
   let element = $('div[data-tb-region*="News"]').first();
   let p = element.parentsUntil("div.block.B6").last();
@@ -132,6 +165,10 @@ $(document).ready(() => {
     let baseUrl = `${serverUrl}/api/articles`;
 
     $.post(baseUrl, article);
+
+    removeGoogleGlobalAds();
+    removeGoogleArticlePageAds();
+    removeTaboolaAds();
   }
 });
 
