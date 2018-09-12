@@ -14,6 +14,7 @@ chrome.storage.sync.get(["mainTitles", "articles"], data => {
   isArticlesEnabled = data.articles;
 
   injectScript("disableAutoRefresh.js");
+  injectScript("disableAutoPlay.js");
 });
 
 class Article {
@@ -89,8 +90,6 @@ function removeTaboolaAds() {
 
   taboolaElements.each((index, element) => {
     let e = $(element);
-
-    log(`removing ${e.attr("id")}`);
     e.remove();
   });
 }
@@ -104,9 +103,6 @@ function removeGoogleArticlePageAds() {
     if (blueLinkParent != null) blueLinkParent.remove();
   }
 
-  let frame = document.getElementById("ads.mivzakon");
-  if (frame != null) frame.parentNode!.removeChild(frame);
-
   let googleElements = $("div[id^='google'");
 
   googleElements.each((index, element) => {
@@ -118,7 +114,10 @@ function removeGoogleArticlePageAds() {
 }
 
 function removeGoogleGlobalAds() {
-  let frame = document.getElementById("ads.top");
+  let frame = document.getElementById("ads.mivzakon");
+  if (frame != null) frame.parentNode.removeChild(frame);
+
+  frame = document.getElementById("ads.top");
   if (frame != null) frame.parentNode.removeChild(frame);
 
   frame = document.getElementById("ads.ozen.right");
