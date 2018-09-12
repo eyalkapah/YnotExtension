@@ -127,6 +127,9 @@ function removeBanners() {
   // remove google ads
   removeGoogleGlobalAds();
 
+  let frame = document.getElementById("ads.premium");
+  if (frame != null) frame.parentNode.removeChild(frame);
+
   let element = $('div[data-tb-region*="News"]').first();
   let p = element.parentsUntil("div.block.B6").last();
   let p6 = p.parent();
