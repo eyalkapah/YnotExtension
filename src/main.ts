@@ -140,6 +140,7 @@ $(document).ready(() => {
 
   let pageType = Helpers.ExtractUrl(document.URL);
 
+  log(`getting data from ${serverUrl}`);
   if (pageType === UrlType.Home) {
     $.get({
       url: `${serverUrl}/api/articles`,
@@ -162,6 +163,8 @@ $(document).ready(() => {
     log("id = " + article.id);
 
     let baseUrl = `${serverUrl}/api/articles`;
+
+    log(`posting to ${baseUrl} article ${article}`);
 
     $.post(baseUrl, article);
 
@@ -282,6 +285,7 @@ function removeRightTitleAds(rootDiv: JQuery<HTMLElement>) {
 }
 
 function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
+  log("building title");
   rootDiv.removeClass();
 
   let background = rootDiv
@@ -302,9 +306,15 @@ function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
 
   let imgLink = a.find("img").attr("src");
 
+  log(`searching for ${id} in ${mtaItemsArticles.length} articles`);
   let article = mtaItemsArticles.filter(value => value.id === id)[0];
 
-  log(`article found for id: ${id}`);
+  if (article != null) {
+    log(`article found for id: ${id}`);
+    log(`articla amlak: ${article.amlak}`);
+  } else {
+    log(`article not found for ${id}`);
+  }
 
   let titleDiv = rootDiv.find("div.title");
   let title = titleDiv.text();
@@ -312,7 +322,10 @@ function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
   let subtitleDiv = rootDiv.find("div.sub_title");
   let amlak = subtitleDiv.text();
 
-  if (article != undefined) amlak = article.amlak;
+  if (article != undefined) {
+    log(`setting amlak: ${article.amlak}`);
+    amlak = article.amlak;
+  }
 
   let addon: HTMLElement;
   a.children().each((index, element) => {
