@@ -83,59 +83,68 @@ class Helpers {
   }
 }
 
-function removeTaboolaAds() {
-  log("removing taboola ads");
+class AdsHelper {
+  static removeTaboolaAds() {
+    log("removing taboola ads");
 
-  let taboolaElements = $("div[id^='taboola'");
+    let taboolaElements = $("div[id^='taboola'");
 
-  taboolaElements.each((index, element) => {
-    let e = $(element);
-    e.remove();
-  });
-}
-function removeGoogleArticlePageAds() {
-  let ins = $("ins.adsbygoogle");
-  if (ins != null) ins.remove();
-
-  let bluelink = $("a.bluelink");
-  if (bluelink != null) {
-    let blueLinkParent = bluelink.parent("p");
-    if (blueLinkParent != null) blueLinkParent.remove();
+    taboolaElements.each((index, element) => {
+      let e = $(element);
+      e.remove();
+    });
   }
 
-  let googleElements = $("div[id^='google'");
+  static removeGoogleArticlePageAds() {
+    let ins = $("ins.adsbygoogle");
+    if (ins != null) ins.remove();
 
-  googleElements.each((index, element) => {
-    let e = $(element);
-    let parent = e.parent();
+    let bluelink = $("a.bluelink");
+    if (bluelink != null) {
+      let blueLinkParent = bluelink.parent("p");
+      if (blueLinkParent != null) blueLinkParent.remove();
+    }
 
-    if (parent != null) parent.remove();
-  });
-}
+    let googleElements = $("div[id^='google'");
 
-function removeGoogleGlobalAds() {
-  let frame = document.getElementById("ads.mivzakon");
-  if (frame != null) frame.parentNode.removeChild(frame);
+    googleElements.each((index, element) => {
+      let e = $(element);
+      let parent = e.parent();
 
-  frame = document.getElementById("ads.top");
-  if (frame != null) frame.parentNode.removeChild(frame);
+      if (parent != null) parent.remove();
+    });
+  }
 
-  frame = document.getElementById("ads.ozen.right");
-  if (frame != null) frame.parentNode.removeChild(frame);
-}
-function removeBanners() {
-  // remove google ads
-  removeGoogleGlobalAds();
+  static removeGoogleGlobalAds() {
+    let frame = document.getElementById("ads.mivzakon");
+    if (frame != null) frame.parentNode.removeChild(frame);
 
-  let frame = document.getElementById("ads.premium");
-  if (frame != null) frame.parentNode.removeChild(frame);
+    frame = document.getElementById("ads.top");
+    if (frame != null) frame.parentNode.removeChild(frame);
 
-  let element = $('div[data-tb-region*="News"]').first();
-  let p = element.parentsUntil("div.block.B6").last();
-  let p6 = p.parent();
-  let p6Closest = p6.prev("div.block.B6");
+    frame = document.getElementById("ads.ozen.right");
+    if (frame != null) frame.parentNode.removeChild(frame);
+  }
 
-  if (p6Closest != undefined) p6Closest.remove();
+  static removeArticlePageAds() {
+    AdsHelper.removeGoogleGlobalAds();
+    AdsHelper.removeGoogleArticlePageAds();
+    AdsHelper.removeTaboolaAds();
+  }
+  static removeHomePageAds() {
+    // remove google ads
+    AdsHelper.removeGoogleGlobalAds();
+
+    let frame = document.getElementById("ads.premium");
+    if (frame != null) frame.parentNode.removeChild(frame);
+
+    let element = $('div[data-tb-region*="News"]').first();
+    let p = element.parentsUntil("div.block.B6").last();
+    let p6 = p.parent();
+    let p6Closest = p6.prev("div.block.B6");
+
+    if (p6Closest != undefined) p6Closest.remove();
+  }
 }
 
 $(document).ready(() => {
@@ -153,38 +162,40 @@ $(document).ready(() => {
       }
     });
   } else if (pageType === UrlType.Article) {
-    log("Send Amlak");
-
-    let article = extractArticle();
-
-    let linkUrl = document.URL.substring(0, document.URL.lastIndexOf(".html"));
-
-    log("linkUrl = " + linkUrl);
-
-    article.id = linkUrl.split("/").pop();
-
-    log("id = " + article.id);
-
-    let baseUrl = `${serverUrl}/api/articles`;
-
-    log(`posting to ${baseUrl} article ${article}`);
-
-    $.post(baseUrl, article);
-
-    removeGoogleGlobalAds();
-    removeGoogleArticlePageAds();
-    removeTaboolaAds();
+    extractArticlePage();
   }
 });
 
 function extractHomePage(data: Array<Article>) {
   mtaItemsArticles = data;
 
-  log("extracting home page");
+  log("extracting home page.");
 
+  AdsHelper.removeHomePageAds();
   if (isMainTitlesEnabled) extractMainTitles();
-  removeBanners();
   if (isArticlesEnabled) extractContentWrap();
+}
+
+function extractArticlePage() {
+  AdsHelper.removeArticlePageAds();
+
+  log("extracting article page.");
+
+  let article = extractArticle();
+
+  let linkUrl = document.URL.substring(0, document.URL.lastIndexOf(".html"));
+
+  log("linkUrl = " + linkUrl);
+
+  article.id = linkUrl.split("/").pop();
+
+  log("id = " + article.id);
+
+  let baseUrl = `${serverUrl}/api/articles`;
+
+  log(`posting to ${baseUrl} article ${article}`);
+
+  $.post(baseUrl, article);
 }
 
 function injectScript(filename: string) {
@@ -500,9 +511,5 @@ function adjustHeights() {
         }
       });
     }
-    // log("Number of content_wrap divs: " + div.length);
-    //log($(element).attr("class"));
-
-    //log("content_wraps found: " + divs.length);
   });
 }
