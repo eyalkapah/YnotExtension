@@ -465,7 +465,35 @@ function BuildMTAItems(ul: JQuery<HTMLElement>) {
     let amlak = result[0];
 
     if (article != undefined) {
-      let amlakDiv = `<div class="mta_gray_text" style="color:#000000">${
+      let subtitle = amlak.subtitle;
+
+      let pattern = /[?|!]+/g;
+      let s = subtitle.replace(pattern, "");
+      let t = article.title.replace(pattern, "");
+      log(s);
+      log(t);
+
+      if (s.localeCompare(t) == 0) {
+        log("strings equal.");
+        subtitle = "";
+      } else if (s.split(":").length > 1 && t.split(":").length > 1) {
+        log(`includes ":"`);
+        let s1 = s.split(":")[0];
+        let t1 = t.split(":")[0];
+        let s2 = s.split(":")[1];
+
+        log(s1);
+        log(t1);
+        if (s1.localeCompare(t1) == 0) {
+          subtitle = `<b>${s2}</b>.`;
+        } else {
+          subtitle = `<b>${subtitle}</b>. `;
+        }
+      } else {
+        subtitle = `<b>${subtitle}</b>. `;
+      }
+
+      let amlakDiv = `<div class="mta_gray_text" style="color:#000000">${subtitle}${
         amlak.amlak
       }</div>`;
 
