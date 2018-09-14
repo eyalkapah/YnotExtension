@@ -470,13 +470,13 @@ function BuildMTAItems(ul: JQuery<HTMLElement>) {
     if (article != undefined) {
       let subtitle = amlak.subtitle;
 
-      let pattern = /[?|!]+/g;
+      let pattern = /[?|!|"|,]+/g;
       let s = subtitle.replace(pattern, "");
       let t = article.title.replace(pattern, "");
       log(s);
       log(t);
 
-      if (s.localeCompare(t) == 0) {
+      if (s.trim().localeCompare(t.trim()) == 0) {
         log("strings equal.");
         subtitle = "";
       } else if (s.split(":").length > 1 && t.split(":").length > 1) {
