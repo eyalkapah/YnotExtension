@@ -119,6 +119,9 @@ class AdsHelper {
     let frame = document.getElementById("ads.mivzakon");
     if (frame != null) frame.parentNode.removeChild(frame);
 
+    frame = document.getElementById("ads.newspaper");
+    if (frame != null) frame.parentNode.removeChild(frame);
+
     frame = document.getElementById("ads.top");
     if (frame != null) frame.parentNode.removeChild(frame);
 
