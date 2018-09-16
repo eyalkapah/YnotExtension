@@ -4,7 +4,7 @@ let serverUrl = "";
 const localUrl = "https://localhost:44320";
 const cloudUrl = "https://myynot.azurewebsites.net";
 let mtaItemsArticles: Article[] = [];
-let isDebug = false;
+let isDebug = true;
 
 chrome.storage.sync.get(["mainTitles", "articles"], data => {
   log(`mainTitles is: ${data.mainTitles}`);
@@ -532,26 +532,26 @@ function extractSubtitle(subtitle: string, title: string): string {
 
 function adjustHeights() {
   log("### Adjust Heights");
-  $("div.block.B6").each((index, element) => {
-    let divs = $(element).find("div.content_wrap");
+  let divs = $(".multiarticles > .content_wrap");
 
-    let heights: number[] = [];
-    if (divs.length === 2) {
-      divs.each((index, element) => {
-        heights.push($(element).height());
-        // let height = $(element).attr("height");
-        // log("height found: " + height);
-      });
-
-      let maxHeight = Math.max(...heights);
-
-      log("max height found: " + maxHeight);
-
-      divs.each((index, element) => {
-        if ($(element).height() != maxHeight) {
-          $(element).height(maxHeight);
-        }
-      });
-    }
+  let heights: number[] = [];
+  $(".multiarticles > .content_wrap").each((index, element) => {
+    heights.push($(element).height());
   });
+
+  let maxHeight = Math.max(heights[0], heights[1]);
+  $(divs[0]).height(maxHeight);
+  $(divs[1]).height(maxHeight);
+
+  maxHeight = Math.max(heights[2], heights[3]);
+  $(divs[2]).height(maxHeight);
+  $(divs[3]).height(maxHeight);
+
+  maxHeight = Math.max(heights[4], heights[6]);
+  $(divs[4]).height(maxHeight);
+  $(divs[6]).height(maxHeight);
+
+  maxHeight = Math.max(heights[5], heights[7]);
+  $(divs[5]).height(maxHeight);
+  $(divs[7]).height(maxHeight);
 }
