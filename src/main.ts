@@ -435,7 +435,11 @@ function buildMTAPicDiv(ul: JQuery<HTMLElement>, div: JQuery<HTMLElement>) {
   let article = mtaItemsArticles.filter(value => value.id === id)[0];
 
   let amlak = "";
-  if (article != undefined) amlak = article.amlak;
+  let subtitle = "";
+  if (article != undefined) {
+    amlak = article.amlak;
+    subtitle = extractSubtitle(article.subtitle, title);
+  }
 
   let e = $.parseHTML(
     `<div style="clear: both">
@@ -445,7 +449,7 @@ function buildMTAPicDiv(ul: JQuery<HTMLElement>, div: JQuery<HTMLElement>) {
   
         <div class="str3s_txt">
         <div class="title" style="margin-right: 10px"><a href="${linkUrl}" style="text-decoration:none;color: #000000">${title}</a></div>
-        <div style="margin-right: 10px"><a href="${linkUrl}" style="text-decoration:none;color: #000000">${amlak}</a></div>
+        <div style="margin-right: 10px"><a href="${linkUrl}" style="text-decoration:none;color: #000000">${subtitle}${amlak}</a></div>
         
         </div>`
   );
@@ -468,33 +472,7 @@ function BuildMTAItems(ul: JQuery<HTMLElement>) {
     let amlak = result[0];
 
     if (article != undefined) {
-      let subtitle = amlak.subtitle;
-
-      let pattern = /[?|!|"|,]+/g;
-      let s = subtitle.replace(pattern, "");
-      let t = article.title.replace(pattern, "");
-      log(s);
-      log(t);
-
-      if (s.trim().localeCompare(t.trim()) == 0) {
-        log("strings equal.");
-        subtitle = "";
-      } else if (s.split(":").length > 1 && t.split(":").length > 1) {
-        log(`includes ":"`);
-        let s1 = s.split(":")[0];
-        let t1 = t.split(":")[0];
-        let s2 = s.split(":")[1];
-
-        log(s1);
-        log(t1);
-        if (s1.localeCompare(t1) == 0) {
-          subtitle = `<b>${s2}</b>.`;
-        } else {
-          subtitle = `<b>${subtitle}</b>. `;
-        }
-      } else {
-        subtitle = `<b>${subtitle}</b>. `;
-      }
+      let subtitle = extractSubtitle(amlak.subtitle, article.title);
 
       let amlakDiv = `<div class="mta_gray_text" style="color:#000000">${subtitle}${
         amlak.amlak
@@ -517,6 +495,39 @@ function BuildMTAItems(ul: JQuery<HTMLElement>) {
       $(element).append(authorDiv);
     }
   });
+}
+
+function extractSubtitle(subtitle: string, title: string): string {
+  log(`extractSubtitle: title: ${title}, subtitle: ${subtitle}`);
+  let pattern = /[?|!|"|,]+/g;
+  let s = subtitle.replace(pattern, "");
+  let t = title.replace(pattern, "");
+  log(s);
+  log(t);
+
+  if (s.trim().localeCompare(t.trim()) == 0) {
+    log("strings equal.");
+    subtitle = "";
+  } else if (t.trim().includes(s.trim())) {
+    subtitle = "";
+  } else if (s.split(":").length > 1 && t.split(":").length > 1) {
+    log(`includes ":"`);
+    let s1 = s.split(":")[0];
+    let t1 = t.split(":")[0];
+    let s2 = s.split(":")[1];
+
+    log(s1);
+    log(t1);
+    if (s1.localeCompare(t1) == 0) {
+      subtitle = `<b>${s2}</b>.`;
+    } else {
+      subtitle = `<b>${subtitle}</b>. `;
+    }
+  } else {
+    subtitle = `<b>${subtitle}</b>. `;
+  }
+
+  return subtitle;
 }
 
 function adjustHeights() {

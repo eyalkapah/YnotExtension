@@ -1,16 +1,17 @@
 console.log("disable auto play");
-let iframe = document.querySelector(".iframeFloaterPotential");
+let playerIframe = document.querySelector(".iframeFloaterPotential");
 
-if (iframe != null) {
-  var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+if (playerIframe != null) {
+  var iframeDocument =
+    playerIframe.contentDocument || playerIframe.contentWindow.document;
 
-  if (iframe && iframe.contentWindow) {
+  if (playerIframe && playerIframe.contentWindow) {
     var readFlowInterval = setInterval(function() {
-      if (iframe.contentWindow.flowplayer) {
+      if (playerIframe.contentWindow.flowplayer) {
         clearInterval(readFlowInterval);
 
         console.log(`getting player...`);
-        let player = iframe.contentWindow.flowplayer("#vastFlowPlayer");
+        let player = playerIframe.contentWindow.flowplayer("#vastFlowPlayer");
         if (player) {
           console.log("player found!");
           var readyPlayerState = setInterval(function() {
