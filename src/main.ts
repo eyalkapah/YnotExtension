@@ -4,7 +4,7 @@ let serverUrl = "";
 const localUrl = "https://localhost:44320";
 const cloudUrl = "https://myynot.azurewebsites.net";
 let mtaItemsArticles: Article[] = [];
-let isDebug = true;
+let isDebug = false;
 
 chrome.storage.sync.get(["mainTitles", "articles"], data => {
   log(`mainTitles is: ${data.mainTitles}`);
