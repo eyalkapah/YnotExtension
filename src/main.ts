@@ -116,17 +116,24 @@ class AdsHelper {
   }
 
   static removeGoogleGlobalAds() {
-    let frame = document.getElementById("ads.mivzakon");
-    if (frame != null) frame.parentNode.removeChild(frame);
+    let ads = $("div[id^='ads'");
 
-    frame = document.getElementById("ads.newspaper");
-    if (frame != null) frame.parentNode.removeChild(frame);
+    ads.each((index, element) => {
+      let e = $(element);
+      e.remove();
+    });
 
-    frame = document.getElementById("ads.top");
-    if (frame != null) frame.parentNode.removeChild(frame);
+    // let frame = document.getElementById("ads.mivzakon");
+    // if (frame != null) frame.parentNode.removeChild(frame);
 
-    frame = document.getElementById("ads.ozen.right");
-    if (frame != null) frame.parentNode.removeChild(frame);
+    // frame = document.getElementById("ads.newspaper");
+    // if (frame != null) frame.parentNode.removeChild(frame);
+
+    // frame = document.getElementById("ads.top");
+    // if (frame != null) frame.parentNode.removeChild(frame);
+
+    // frame = document.getElementById("ads.ozen.right");
+    // if (frame != null) frame.parentNode.removeChild(frame);
   }
 
   static removeArticlePageAds() {
@@ -137,6 +144,7 @@ class AdsHelper {
   static removeHomePageAds() {
     // remove google ads
     AdsHelper.removeGoogleGlobalAds();
+    AdsHelper.removeTaboolaAds();
 
     let frame = document.getElementById("ads.premium");
     if (frame != null) frame.parentNode.removeChild(frame);
