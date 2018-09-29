@@ -4,7 +4,7 @@ let serverUrl = "";
 const localUrl = "https://localhost:44320";
 const cloudUrl = "https://myynot.azurewebsites.net";
 let mtaItemsArticles: Article[] = [];
-let isDebug = false;
+let isDebug = true;
 
 chrome.storage.sync.get(["mainTitles", "articles"], data => {
   log(`mainTitles is: ${data.mainTitles}`);
@@ -87,67 +87,31 @@ class AdsHelper {
   static removeTaboolaAds() {
     log("removing taboola ads");
 
-    let taboolaElements = $("div[id^='taboola'");
-
-    taboolaElements.each((index, element) => {
-      let e = $(element);
-      e.remove();
-    });
+    $("div[id*='taboola'").remove();
   }
 
-  static removeGoogleArticlePageAds() {
-    let ins = $("ins.adsbygoogle");
-    if (ins != null) ins.remove();
+  static removeGoogleAds() {
+    log("removing google ads");
+
+    $("div[id^='ads'").remove();
+    $("*[class*='google'").remove();
+    $("div[id^='google'").remove();
+  }
+
+  static removeArticlePageAds() {
+    AdsHelper.removeGoogleAds();
+    AdsHelper.removeTaboolaAds();
 
     let bluelink = $("a.bluelink");
     if (bluelink != null) {
       let blueLinkParent = bluelink.parent("p");
       if (blueLinkParent != null) blueLinkParent.remove();
     }
-
-    let googleElements = $("div[id^='google'");
-
-    googleElements.each((index, element) => {
-      let e = $(element);
-      let parent = e.parent();
-
-      if (parent != null) parent.remove();
-    });
-  }
-
-  static removeGoogleGlobalAds() {
-    let ads = $("div[id^='ads'");
-
-    ads.each((index, element) => {
-      let e = $(element);
-      e.remove();
-    });
-
-    // let frame = document.getElementById("ads.mivzakon");
-    // if (frame != null) frame.parentNode.removeChild(frame);
-
-    // frame = document.getElementById("ads.newspaper");
-    // if (frame != null) frame.parentNode.removeChild(frame);
-
-    // frame = document.getElementById("ads.top");
-    // if (frame != null) frame.parentNode.removeChild(frame);
-
-    // frame = document.getElementById("ads.ozen.right");
-    // if (frame != null) frame.parentNode.removeChild(frame);
-  }
-
-  static removeArticlePageAds() {
-    AdsHelper.removeGoogleGlobalAds();
-    AdsHelper.removeGoogleArticlePageAds();
-    AdsHelper.removeTaboolaAds();
   }
   static removeHomePageAds() {
     // remove google ads
-    AdsHelper.removeGoogleGlobalAds();
+    AdsHelper.removeGoogleAds();
     AdsHelper.removeTaboolaAds();
-
-    let frame = document.getElementById("ads.premium");
-    if (frame != null) frame.parentNode.removeChild(frame);
 
     let element = $('div[data-tb-region*="News"]').first();
     let p = element.parentsUntil("div.block.B6").last();
@@ -387,13 +351,13 @@ function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
 function extractArticle(): Article {
   let article = new Article();
 
-  let titleElement = $(".art_header_title").get(0);
+  article.subtitle = $("div.art_header_title")
+    .first()
+    .text();
 
-  article.subtitle = titleElement.innerHTML;
-
-  let amlakElement = $(".art_header_sub_title").get(0);
-
-  article.amlak = amlakElement.innerHTML;
+  article.amlak = $("div.art_header_sub_title")
+    .first()
+    .text();
 
   return article;
 }
