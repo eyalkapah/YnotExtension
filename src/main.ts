@@ -186,22 +186,28 @@ function injectScript(filename: string) {
 function extractMainTitles() {
   log("extracting main titles");
 
-  let rootDiv = $(
-    ".str3s_small.str3s_type_small, .str3s_small.str3s_type_small > .cell, .str3s_small.str3s_type_small > .cell > a, .str3s_small.str3s_type_small > .cell > .str3s_img > img"
-  );
+  let rootDiv = $("article > div.block.B6").first();
+  let articlesDiv = rootDiv.children("div.block.B6").eq(2);
+  let leftPanelDiv = articlesDiv.children("div.block.B3").first();
+  let leftPanelArticlesDiv = leftPanelDiv.children("div.block.B3").first();
+  let leftPanelMiniArticlesDiv = leftPanelArticlesDiv.children().last();
 
-  let parentDiv = rootDiv.first().closest("div.block.B3");
-  let adsDiv = removeRightTitleAds(parentDiv.closest("div.block.B6"));
-  adsDiv.empty();
+  articlesDiv.css("width", "1000px");
 
-  let parentDivCloned = parentDiv.clone(true);
-  parentDiv.empty();
+  // clear right panel
+  articlesDiv.find("div.block.B1.spacer").remove();
+  articlesDiv.find("div.block.B2b.spacer").remove();
 
-  let homePageMiniTitles = parentDivCloned
-    .find("div.homepageministrip.hpstrip_new")
-    .parent("div.element.B3.ghcite.noBottomPadding");
+  // add right panel div
+  let rightPanelArticlesDiv = $("<div>")
+    .addClass("block B3 spacer")
+    .css("margin-left", "20px");
+  articlesDiv.append(rightPanelArticlesDiv);
 
-  parentDivCloned.children().each((index, element) => {
+  let leftPanelArticlesDivCloned = leftPanelArticlesDiv.clone(true);
+  leftPanelArticlesDiv.empty();
+
+  leftPanelArticlesDivCloned.children().each((index, element) => {
     let div = $(element);
 
     log(`title number: ${index}`);
@@ -210,24 +216,15 @@ function extractMainTitles() {
 
     if (divChildClass != "str3s str3s_small str3s_type_small") return;
 
-    let divClone = div.clone(true);
+    if (index % 2 == 0) leftPanelArticlesDiv.append(buildTitle(div));
+    else rightPanelArticlesDiv.append(buildTitle(div));
 
-    let e = buildTitle(divClone);
-
-    let selectedDiv = parentDiv;
-
-    if (index % 2 != 0) selectedDiv = adsDiv;
-
-    if (e != undefined) selectedDiv.append(e);
-    else selectedDiv.append(divClone);
-
-    selectedDiv.append(homePageMiniTitles);
     log("------------------");
   });
 
-  adjustTitlesHeight(parentDiv, adsDiv);
+  rightPanelArticlesDiv.append(leftPanelMiniArticlesDiv);
 
-  adsDiv.append(homePageMiniTitles);
+  adjustTitlesHeight(leftPanelArticlesDiv, rightPanelArticlesDiv);
 }
 
 function adjustTitlesHeight(
@@ -255,27 +252,11 @@ function adjustTitlesHeight(
   });
 }
 
-function removeRightTitleAds(rootDiv: JQuery<HTMLElement>) {
-  log(`B6 block found: ${rootDiv.attr("class")}`);
-
-  rootDiv.css("width", "1000px");
-  let adsDiv = rootDiv.find("div.block.B1.spacer");
-  adsDiv.empty();
-
-  adsDiv = rootDiv.find("div.block.B2b.spacer");
-
-  log(`ads div found ${adsDiv.attr("class")}`);
-  adsDiv.empty();
-  adsDiv.removeClass();
-  adsDiv.addClass("block B3 spacer");
-  adsDiv.css("margin-left", "20px");
-
-  return adsDiv;
-}
-
-function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
+function buildTitle(
+  rootDiv: JQuery<HTMLElement>
+): JQuery<HTMLElement> | undefined {
   log("building title");
-  rootDiv.removeClass();
+  //rootDiv.removeClass();
 
   let background = rootDiv
     .find("div.str3s.str3s_small.str3s_type_small")
@@ -283,10 +264,6 @@ function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
 
   let a = rootDiv.find("a.str3s_img");
   let linkUrl = a.attr("href");
-  log("linkUrl: " + linkUrl);
-
-  if (linkUrl === undefined) return;
-
   let id = linkUrl
     .substring(0, linkUrl.lastIndexOf(".html"))
     .split("/")
@@ -305,30 +282,15 @@ function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
     log(`article not found for ${id}`);
   }
 
-  let titleDiv = rootDiv.find("div.title");
-  let title = titleDiv.text();
-
-  let subtitleDiv = rootDiv.find("div.sub_title");
-  let amlak = subtitleDiv.text();
+  let title = rootDiv.find("div.title").text();
+  let amlak = rootDiv.find("div.sub_title").text();
 
   if (article != undefined) {
     log(`setting amlak: ${article.amlak}`);
     amlak = article.amlak;
   }
 
-  let addon: HTMLElement;
-  a.children().each((index, element) => {
-    if (index === 0) {
-      addon = element;
-      addon.style.height = "29px";
-      addon.style.width = "29px";
-      addon.style.zIndex = "999";
-      addon.style.position = "absolute";
-    }
-  });
-
-  let e = $.parseHTML(
-    `<div style="clear: both;background: ${background};margin-bottom: 16px;min-height: 118px">
+  return $(`<div style="clear: both;background: ${background};margin-bottom: 16px;min-height: 118px">
         <div class="cell cshort layout1" style="margin-right: 3px"><a class="str3s_img" href="${linkUrl} style="float:right">
         <div style="float:right;display=block;position:relative">
         <div style="position:absolute;bottom:3px;left:3px;z-index:999;width:29px;height:29px;background:url('/images/small_play_new.png') no-repeat"></div>
@@ -342,10 +304,7 @@ function buildTitle(rootDiv: JQuery<HTMLElement>): JQuery.Node[] | undefined {
         <div class="title" style="direction:rtl;margin-top: 16px;margin-right: -10px;text-align: right;color:#FFFFFF;line-height:22px"><a href="${linkUrl}" style="text-decoration:none;color: #FFFFFF">${title}</a></div>
         <div class="sub_title sub_title_no_credit" style="margin: 3px 10px 16px 10px; text-align: right;color:#FFFFFF;line-height:17px;direction:rtl">
         <a href="${linkUrl}" style="text-decoration:none;color: #FFFFFF">${amlak}</a></div>
-        </div>`
-  );
-
-  return e;
+        </div>`);
 }
 
 function extractArticle(): Article {
