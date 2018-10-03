@@ -199,9 +199,9 @@ function extractMainTitles() {
   articlesDiv.find("div.block.B2b.spacer").remove();
 
   // add right panel div
-  let rightPanelArticlesDiv = $("<div>")
-    .addClass("block B3 spacer")
-    .css("margin-left", "20px");
+  let rightPanelArticlesDiv = $(
+    `<div class="block B3 spacer" style="margin-left: 20px">`
+  );
   articlesDiv.append(rightPanelArticlesDiv);
 
   let leftPanelArticlesDivCloned = leftPanelArticlesDiv.clone(true);
