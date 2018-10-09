@@ -4,7 +4,7 @@ let serverUrl = "";
 const localUrl = "https://localhost:44320";
 const cloudUrl = "https://myynot.azurewebsites.net";
 let mtaItemsArticles: Article[] = [];
-let isDebug = true;
+let isDebug = false;
 
 chrome.storage.sync.get(["mainTitles", "articles"], data => {
   log(`mainTitles is: ${data.mainTitles}`);
@@ -148,6 +148,7 @@ function extractHomePage(data: Array<Article>) {
 
   AdsHelper.removeHomePageAds();
   if (isMainTitlesEnabled) extractMainTitles();
+
   if (isArticlesEnabled) extractContentWrap();
 }
 
@@ -321,12 +322,76 @@ function extractArticle(): Article {
   return article;
 }
 
-function extractContentWrap() {
-  let rootUl = $(
-    ".multiarticles.mta_4 > .content_wrap > .mta_pic_items, .multiarticles.mta_3 > .content_wrap > .mta_pic_items"
-  );
+function getPanel(
+  leftArticle: JQuery<HTMLElement>,
+  rightArticle: JQuery<HTMLElement>
+): JQuery<HTMLElement> {
+  let block = $(`<div class="block B6"></div>`);
+  let left = $(`<div class="block B3"></div>`);
+  let right = $(`<div class="block B3b spacer"></div>`);
 
-  rootUl.each((index, element) => {
+  left.append(leftArticle);
+  right.append(rightArticle);
+
+  block.append(left);
+  block.append(right);
+
+  return block;
+}
+function extractContentWrap() {
+  let keep = $("div.block.B6:first")
+    .find("div.block.B6")
+    .eq(4)
+    .find("div.block.B6")
+    .eq(1)
+    .clone(true);
+  let all = $("div.element.ghcite.noBottomPadding");
+
+  let root = $("div.block.B6:first");
+
+  let panels: JQuery<HTMLElement>[] = [];
+  panels.push(getPanel(all.eq(1).clone(true), all.eq(2).clone(true)));
+  panels.push(keep);
+  panels.push(getPanel(all.eq(3).clone(true), all.eq(4).clone(true)));
+  panels.push(getPanel(all.eq(5).clone(true), all.eq(7).clone(true)));
+  panels.push(getPanel(all.eq(6).clone(true), all.eq(8).clone(true)));
+  //root.append(getPanel(all.eq(9).clone(true), all.eq(10).clone(true)));
+  //root.append(getPanel(all.eq(11).clone(true), all.eq(12).clone(true)));
+  panels.push(getPanel(all.eq(14).clone(true), all.eq(17).clone(true)));
+  panels.push(getPanel(all.eq(15).clone(true), all.eq(18).clone(true)));
+  panels.push(getPanel(all.eq(16).clone(true), all.eq(19).clone(true)));
+  panels.push(getPanel(all.eq(20).clone(true), all.eq(21).clone(true)));
+  panels.push(getPanel(all.eq(22).clone(true), all.eq(23).clone(true)));
+
+  root.children().each((index, element) => {
+    if (index > 2) $(element).remove();
+  });
+
+  log(`all count: ${all.length}`);
+
+  panels.forEach(element => {
+    root.append(element);
+  });
+
+  // remove B2
+  all = $("div.element.ghcite.noBottomPadding");
+  all.each((index, e) => {
+    let element = $(e);
+    if ($(element).hasClass("B2")) {
+      $(element).removeClass("B2");
+      if (
+        $(element)
+          .parent()
+          .hasClass("spacer")
+      )
+        $(element).addClass("B3b");
+      else $(element).addClass("B3");
+    }
+  });
+
+  let picItemsUl = $("ul.mta_pic_items");
+
+  picItemsUl.each((index, element) => {
     let ul = $(element);
     let div = ul.parent();
 
@@ -342,7 +407,17 @@ function extractContentWrap() {
     div.append(ulMtaItems);
   });
 
-  adjustHeights();
+  // adjust heights
+  let contents = all.find("div.content_wrap");
+  let previousElement: JQuery<HTMLElement> | undefined = undefined;
+
+  contents.each((index, element) => {
+    if (index % 2 != 0 && index > 0) {
+      adjustDivHeights($(element), previousElement);
+    } else {
+      previousElement = $(element);
+    }
+  });
 }
 
 function buildMTAPicDiv(ul: JQuery<HTMLElement>, div: JQuery<HTMLElement>) {
@@ -461,28 +536,19 @@ function extractSubtitle(subtitle: string, title: string): string {
   return subtitle;
 }
 
-function adjustHeights() {
-  log("### Adjust Heights");
-  let divs = $(".multiarticles > .content_wrap");
+function adjustDivHeights(
+  leftDiv: JQuery<HTMLElement>,
+  rightDiv: JQuery<HTMLElement>
+) {
+  log("adjustDivHeights");
+  log(`left height: ${leftDiv.height()}, right height: ${rightDiv.height()}`);
 
-  let heights: number[] = [];
-  $(".multiarticles > .content_wrap").each((index, element) => {
-    heights.push($(element).height());
-  });
+  let leftHeight = leftDiv.height();
+  let rightHeight = rightDiv.height();
 
-  let maxHeight = Math.max(heights[0], heights[1]);
-  $(divs[0]).height(maxHeight);
-  $(divs[1]).height(maxHeight);
+  if (leftHeight === rightHeight) return;
 
-  maxHeight = Math.max(heights[2], heights[3]);
-  $(divs[2]).height(maxHeight);
-  $(divs[3]).height(maxHeight);
-
-  maxHeight = Math.max(heights[4], heights[6]);
-  $(divs[4]).height(maxHeight);
-  $(divs[6]).height(maxHeight);
-
-  maxHeight = Math.max(heights[5], heights[7]);
-  $(divs[5]).height(maxHeight);
-  $(divs[7]).height(maxHeight);
+  let height = Math.max(leftHeight, rightHeight);
+  leftDiv.height(height);
+  rightDiv.height(height);
 }
